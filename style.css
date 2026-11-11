@@ -202,13 +202,20 @@
 /* Switch: a pill toggle instead of ST's square box. The extra classes out-rank ST's
    input[type='checkbox'] rules (size, tick clip-path, scale(0) knob). */
 .st-desloper-settings input[type="checkbox"].sd_switch {
+    /* Whole pixels on purpose: the knob gets the same gap on every side, so it is
+       concentric with the track ends. With em sizes the gaps land on fractions of a
+       pixel and get rounded differently top vs bottom, which looks off-centre.
+       Track 36x20, border 1, gap 2 → knob 14. */
+    --sd-sw-gap: 2px;
+    --sd-sw-knob: 14px;
+    box-sizing: border-box;
     -webkit-appearance: none;
     appearance: none;
     position: relative;
     display: inline-block;
     flex: 0 0 auto;
-    width: 2.15em;
-    height: 1.2em;
+    width: 36px;
+    height: 20px;
     margin: 0;
     padding: 0;
     /* !important: themes such as Moonlit Echoes force `border-radius: 100% !important`
@@ -217,7 +224,8 @@
     border: 1px solid var(--sd-line) !important;
     outline: none;
     background: rgba(0, 0, 0, 0.3);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45) !important;
+    /* Even all round: a downward inner shadow makes the knob look like it sits low. */
+    box-shadow: inset 0 0 3px rgba(0, 0, 0, 0.45) !important;
     filter: none;
     transform: none;
     overflow: visible;
@@ -228,11 +236,14 @@
 .st-desloper-settings input[type="checkbox"].sd_switch::before {
     content: "";
     position: absolute;
-    top: 50%;
-    left: 0.14em;
-    width: 0.86em;
-    height: 0.86em;
-    border-radius: 50%;
+    top: var(--sd-sw-gap);
+    left: var(--sd-sw-gap);
+    width: var(--sd-sw-knob);
+    height: var(--sd-sw-knob);
+    margin: 0;
+    box-sizing: border-box;
+    border: 0;
+    border-radius: 50% !important;
     /* Round knob: drop ST's tick look (inset box-shadow + clip-path). */
     clip-path: none;
     -webkit-mask: none;
@@ -240,8 +251,7 @@
     box-shadow: none;
     background: var(--SmartThemeBodyColor, #ddd);
     opacity: 0.55;
-    transform-origin: center;
-    transform: translateY(-50%);
+    transform: none;
     transition: left 0.18s, opacity 0.18s;
 }
 
@@ -251,9 +261,9 @@
 }
 
 .st-desloper-settings input[type="checkbox"].sd_switch:checked::before {
-    left: calc(100% - 1em);
+    left: calc(100% - var(--sd-sw-gap) - var(--sd-sw-knob));
     opacity: 1;
-    transform: translateY(-50%);
+    transform: none;
 }
 
 .st-desloper-settings input[type="checkbox"].sd_switch:focus-visible {
