@@ -59,8 +59,9 @@ const CONTRAST_ADVERB = /^(?:simply|just|merely|only)\s+/;
 // A short opener before a lone negation: "For a moment, she doesn't move." (one capitalized word
 // and up to three more, then a comma, at a sentence start).
 const LEAD_PHRASE = /(?:^|[.!?…~♡]["”’»」』)\]*_]*\s+|\n)[\s*_(]*[A-Z][a-z]*(?:\s+[a-z]+){0,3},\s+$/;
-// A lone negation tagged on with "though / yet / but": "…, though she doesn't look away."
-const CONTRAST_TAG = /,\s+(?:though|yet|but)\s+$/;
+// A lone negation tagged on with "though / yet / but": "…, though she doesn't look away." The
+// comma is often left out ('"Careful," she says but she doesn't pull away.').
+const CONTRAST_TAG = /(?:,\s+|(?<=[\p{L}'’"”*])\s+)(?:though|yet|but)\s+$/u;
 // Emphasis after a lone negation that a flip makes pointless: "doesn't move at all" -> "stays still".
 const INTENSIFIER = /\s+(?:at all|(?:even )?for (?:a|one) (?:single )?(?:second|moment|instant)|(?:a|one) single (?:second|moment|instant))$/;
 
