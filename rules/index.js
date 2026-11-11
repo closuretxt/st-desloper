@@ -2,6 +2,7 @@
 // Adding a fix = one file in rules/, one line here, one fixture file in .tests/fixtures/.
 
 import echoTrim from "./echoTrim.js";
+import userRetell from "./userRetell.js";
 import innerRepeat from "./innerRepeat.js";
 import dashBudget from "./dashBudget.js";
 import negationFlip from "./negationFlip.js";
@@ -36,7 +37,7 @@ import { characterPatternRules } from "../core/characters.js";
 // each rule's `order`). By priority: the fixes that catch the most slop first, then the
 // character filters, the off-by-default budgets, and the mechanical clean-ups last.
 export const BUILTIN_RULES = [
-    negationFlip, contrastFrame, phraseLexicon, stockLines, stagedQuestions, threeInARow, echoTrim, innerRepeat,
+    negationFlip, contrastFrame, phraseLexicon, stockLines, stagedQuestions, threeInARow, echoTrim, userRetell, innerRepeat,
     wornImages, stares, hurryClosers, stockPunchlines, tagQuestions, tsk, timeTails, adverbFragments, dashBudget,
     tsundere, bossGirl,
     stutterBudget, gestureBudget, loneLines, flippedEndings, flatQuestions,
