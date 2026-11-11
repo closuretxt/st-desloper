@@ -11,15 +11,21 @@ import tagQuestions from "./tagQuestions.js";
 import tsk from "./tsk.js";
 import timeTails from "./timeTails.js";
 import stockLines from "./stockLines.js";
+import stagedQuestions from "./stagedQuestions.js";
+import threeInARow from "./threeInARow.js";
 import hurryClosers from "./hurryClosers.js";
+import stockPunchlines from "./stockPunchlines.js";
 import tsundere from "./tsundere.js";
 import bossGirl from "./bossGirl.js";
 import stutterBudget from "./stutterBudget.js";
 import gestureBudget from "./gestureBudget.js";
+import wornImages from "./wornImages.js";
 import loneLines from "./loneLines.js";
 import adverbFragments from "./adverbFragments.js";
 import flatQuestions from "./flatQuestions.js";
+import flippedEndings from "./flippedEndings.js";
 import leakedText from "./leakedText.js";
+import chatbotResidue from "./chatbotResidue.js";
 import textFixes from "./textFixes.js";
 import contractions from "./contractions.js";
 import { patternRules } from "./patternRules.js";
@@ -28,11 +34,11 @@ import { patternRules } from "./patternRules.js";
 // each rule's `order`). By priority: the fixes that catch the most slop first, then the
 // character filters, the off-by-default budgets, and the mechanical clean-ups last.
 export const BUILTIN_RULES = [
-    negationFlip, contrastFrame, phraseLexicon, stockLines, echoTrim, innerRepeat,
-    hurryClosers, tagQuestions, tsk, timeTails, adverbFragments, dashBudget,
+    negationFlip, contrastFrame, phraseLexicon, stockLines, stagedQuestions, threeInARow, echoTrim, innerRepeat,
+    wornImages, hurryClosers, stockPunchlines, tagQuestions, tsk, timeTails, adverbFragments, dashBudget,
     tsundere, bossGirl,
-    stutterBudget, gestureBudget, loneLines, flatQuestions,
-    textFixes, contractions, leakedText,
+    stutterBudget, gestureBudget, loneLines, flippedEndings, flatQuestions,
+    textFixes, contractions, leakedText, chatbotResidue,
 ];
 
 // Built-ins plus the user's own patterns, for one run of the pipeline.

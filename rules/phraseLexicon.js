@@ -76,6 +76,38 @@ const SHIVER_PAST = "ran|raced|crawled|crept|traveled|travelled|went|shot|slid|r
 const SHIVER_PAST_SET = new Set(SHIVER_PAST.split("|"));
 const SHIVER_MOTION = "run|running|race|racing|crawl|crawling|creep|creeping|go|going|travel|traveling|travelling|shoot|shooting|slide|sliding|ripple|rippling|snake|snaking|roll|rolling";
 
+// Meaning tails ("…, a silent promise."): the words that make one sure, and the rest of the tail
+// up to the sentence's end (never past a ", and …" that carries on with a new action).
+const MEANING_ADJ = "silent|unspoken|wordless|quiet|tacit|mute|unvoiced|soundless|unsaid|subtle|gentle|clear|unmistakable|tender|soft";
+const MEANING_NOUN = "promise|reminder|declaration|challenge|invitation|plea|warning|vow|confession|apology|question|reassurance|acknowledge?ment|agreement|understanding|offering|admission|command|demand|threat|dare|comfort|message|statement|claim|signal|encouragement|permission|surrender|truce|answer|thank-you|thanks|apology|goodbye|farewell|request|prayer";
+const MEANING_SURE = String.raw`(?:a|an)\s+(?:${MEANING_ADJ})(?:,?\s+(?:${MEANING_ADJ}))?\s+(?:${MEANING_NOUN})\b`;
+const MEANING_SHAPE = String.raw`(?:a\s+reminder\s+(?:that|of\s+(?:who|what|how|where|why|whose))\b|a\s+promise\s+of\s+(?:more|things\s+to\s+come|what(?:['’]s|\s+was|\s+is)\s+(?:to\s+come|coming)|something\s+more)\b)`;
+const MEANING_BODY = String.raw`(?:(?!,\s+(?:and|but|then|before|as|while|yet)\b)[^.!?;…"”*\n]){0,100}?`;
+const MEANING_SURE_RE = new RegExp(String.raw`^,\s+${MEANING_SURE}`, "iu");
+// The clause ends on a thing ("…gives him a note"): an unsure tail may be naming it.
+const ENDS_ON_THING = /\b(?:a|an|the|some|this|that)\s+[\p{L}'’-]+(?:\s+[\p{L}'’-]+)?\s*$/iu;
+
+// "Something more X" tails: "softening into something less performed", "replaced by something
+// more raw", "plum blossoms and something warmer, muskier". The vague "something" adds nothing the
+// sentence before it didn't say. An adjective is any lowercase word that isn't a small grammar
+// word; the chain ends only at the clause's end, so "something soft enough to…", "something like
+// a laugh" and "something else" never match (the "something" carries content there).
+const SOMETHING_ADJ = String.raw`(?!(?:else|like|that|than|to|of|in|on|at|for|about|she|he|they|it|i|you|we|her|his|their|its|my|your|the|a|an|and|or|but|which|who|enough|so|too)\b)\p{Ll}[\p{Ll}-]*`;
+const SOMETHING_TAIL = String.raw`something\s+(?:(?:far|much|a\s+little|a\s+bit|slightly|even|\p{Ll}+ly)\s+)?(?:(?:more|less)\s+)?${SOMETHING_ADJ}(?:(?:\s*,\s*|\s+(?:and|or)\s+)(?:(?:more|less)\s+)?${SOMETHING_ADJ}){0,2}`;
+const SOMETHING_END = String.raw`(?=\s*[.;!?…"”*)\]—–]|\s*$|,\s|\s+(?:and|as|while|when|before|then|but)\b)`;
+// Verbs whose "into something X" can go and leave the verb standing ("softens into something
+// warmer" -> "softens"). Not turn / become / change / morph: those need what they turn into.
+const INTO_VERBS = (() => {
+    const bases = ["soften", "shift", "melt", "settle", "ease", "fade", "dissolve", "warm", "deepen", "darken", "bloom", "blossom", "relax", "sharpen", "curl", "slide", "slip", "twist", "cool", "crack", "fray", "sour", "harden", "mellow", "thaw", "loosen", "tighten", "smooth", "drift"];
+    const forms = new Set();
+    for (const b of bases) for (const f of [b, toThird(b), toPast(b), toIng(b)]) if (f) forms.add(f);
+    return [...forms].sort((a, b) => b.length - a.length).join("|");
+})();
+// The sentence is about a smell, taste or sound: "X and something warmer" is then the vague
+// second half of a sensory list.
+const SENSE_RE = /\b(?:scent|scents|scented|smell|smells|smelled|smelling|smelt|aroma|perfume|fragrance|odou?r|musk|taste|tastes|tasted|tasting|flavou?r|notes?|sound|sounds|voice|breath|air)\b/i;
+const NOT_VERB_NEXT = /^(?:she|he|they|it|i|you|we|her|his|their|the|a|an|and|or|but|then|as|while|when|which|who)$/i;
+
 // Grammar pieces that depend on the chat's names, built once per name list.
 const grammarCache = new Map();
 function grammar(names) {
@@ -172,6 +204,48 @@ function grammar(names) {
         // look is a challenge, which the look already shows. Bare "daring" only after a comma.
         daring: new RegExp(
             String.raw`(?:,?\s+(?:as\s+(?:if|though)|almost)\s+|,\s+(?:silently\s+|practically\s+|just\s+)?)daring\s+(?:him|her|them|me|you|us|anyone|anybody|someone|somebody|everyone|the\s+[\p{L}-]+|${NAMES})\s+to\s+[^.!?;…"”*\n,—–]{1,60}(?=[.!?;…"”*]|$)`,
+            "giu",
+        ),
+        // Meaning tails: "…, a silent promise that she'd stay." The narrator telling what the
+        // gesture means, which the gesture already shows. Sure with a "silent"-type word; without
+        // one only the commentary shapes ("a reminder that…", "a promise of more"), and only
+        // when the clause doesn't end on a handed-over thing ("She gives him a note, a reminder
+        // that…" may be saying what the note is).
+        meaningBetween: new RegExp(String.raw`,\s+${MEANING_SURE}${MEANING_BODY},(?=\s+(?:and|then|before|as|while)\b)`, "giu"),
+        meaningEnd: new RegExp(String.raw`,\s+(?:${MEANING_SURE}|${MEANING_SHAPE})${MEANING_BODY}(?=[.!?;…"”*]|$)`, "giu"),
+        meaningSentence: new RegExp(
+            String.raw`${SENT_START}(?:It|This|That)(?:['’]s|\s+(?:is|was|felt\s+like|feels\s+like|became|becomes))\s+${MEANING_SURE}${MEANING_BODY}[.!]+["”*]?(?:\s+|$)`,
+            "giu",
+        ),
+        somethingInto: new RegExp(String.raw`\b(${INTO_VERBS})\s+into\s+${SOMETHING_TAIL}${SOMETHING_END}`, "giu"),
+        somethingReplaced: new RegExp(String.raw`,\s+(?:(?:replaced|supplanted)\s+(?:by|with)|giving\s+way\s+to|making\s+way\s+for|yielding\s+to)\s+${SOMETHING_TAIL}${SOMETHING_END}`, "giu"),
+        // The chain may be followed by the comma that closes the subject ("…and something warmer,
+        // muskier, fills the room"): that comma goes too, checked in find().
+        somethingAnd: new RegExp(String.raw`(?<=[\p{L}])\s+and\s+${SOMETHING_TAIL}(?:(,)(?=\s+([\p{L}'’]+))|(?=\s*[.;!?…"”*)\]—–]|\s*$))`, "giu"),
+        // "She repeats the word like she's tasting it, rolling it around." The simile only says
+        // she's saying it slowly. "it" alone only when the sentence is about words (else she may
+        // be tasting food); the bare "rolling it around" follow-up goes with it or on its own.
+        tasting: new RegExp(
+            String.raw`,?\s+(?:like|as\s+if|as\s+though)\s+(?:${PRON}(?:['’]s|['’]re|\s+(?:is|was|were|are))?\s+)?(?:(?:tasting|savou?ring)\s+(it|the\s+(?:word|words|name|sound|phrase|question|idea|syllables?)|each\s+(?:word|syllable))|testing\s+(?:out\s+)?(?:the\s+(?:word|words|name|sound|phrase)|each\s+(?:word|syllable)))(?:\s+out)?(?:\s+on\s+${POSS}\s+tongue)?(?:\s+for\s+the\s+first\s+time)?(?:,?\s+(?:and\s+)?(?:rolling|turning)\s+it\s+(?:around|over)(?:\s+(?:on|in)\s+${POSS}\s+(?:tongue|mouth|head))?)?(?=\s*[.;!?…"”*)\]—–]|\s*$|,\s)`,
+            "giu",
+        ),
+        // "Her mouth opens, closes, opens again." A whole sentence of nothing but that beat.
+        mouthOpens: new RegExp(String.raw`${SENT_START}(?:${POSS}\s+)?mouth\s+(?:opens|opened|falls\s+open|fell\s+open),\s+(?:then\s+)?(?:closes|closed|shuts|shut|snaps\s+shut|snapped\s+shut)(?:,?\s+(?:and\s+|then\s+)?(?:opens|opened)\s+again)?(?:,?\s+(?:and\s+|then\s+)?(?:closes|closed|shuts|shut)\s+again)?[.!]+["”*]?(?:\s+|$)`, "giu"),
+        // "her cheeks flushing a deeper shade of pink that reaches all the way to her ears"
+        // -> "her cheeks flushing pink to her ears". The colour and where it goes stay.
+        shade: /\b(?:an?\s+)?(?:even\s+)?(?:deeper|darker|brighter|richer|new|fresh|vivid|alarming|impressive|lovely|pretty|interesting|charming)\s+shade\s+of\s+(?=(?:pink|red|crimson|scarlet|rose|vermilion|cherry|magenta)\b)/gi,
+        shadeReach: new RegExp(String.raw`(?<=\b(?:pink|red|crimson|scarlet|rose|vermilion|cherry|magenta))\s+(?:that|which)\s+(?:reaches|reached|spreads|spread|creeps|crept|crawls|crawled|travels|traveled|travelled|extends|extended|climbs|climbed|stretches|stretched)\s+(?:all\s+the\s+way\s+)?((?:up|down)\s+(?:to\s+)?|to\s+)(${POSS}\s+(?:ears|neck|throat|chest|collarbones?|hairline))\b`, "giu"),
+        rolling: new RegExp(String.raw`,\s+(?:rolling|turning)\s+(?:it|the\s+(?:word|words|name|phrase))\s+(?:around|over)\s+(?:on|in)\s+${POSS}\s+(?:tongue|mouth)(?=\s*[.;!?…"”*)\]—–]|\s*$)|,\s+(?:the\s+)?(?:words?|name)\s+rolling\s+off\s+${POSS}\s+tongue(?=\s*[.;!?…"”*)\]—–]|\s*$)`, "giu"),
+        // "…, curious, a little nervous underneath the bravado." The narrator spelling out the
+        // feeling under a front the scene already shows. Only "underneath / beneath" and a
+        // front that isn't a thing ("hidden behind the mask" can be a real mask): left alone.
+        underneath: new RegExp(
+            String.raw`,\s+(?:(?:a\s+little|a\s+bit|just\s+a\s+little|slightly|faintly|secretly|quietly|still)\s+)?(?!(?:hidden|tucked|buried|concealed|lost)\b)\p{Ll}+(?:\s+and\s+\p{Ll}+)?\s+(?:underneath|beneath)\s+(?:it\s+all|(?:all\s+)?(?:the|${POSS}|that|this)\s+(?:bravado|confidence|swagger|teasing|bluster|composure|show|performance|attitude|sass|banter|act|front|facade|façade|smirk|grin|jokes?|humou?r|bravura|cockiness|nonchalance))(?=\s*[.!?;…"”*)\]—–]|\s*$)`,
+            "giu",
+        ),
+        // "Her eyes stay on his face, watching." The look already says she's watching.
+        eyesWatching: new RegExp(
+            String.raw`(?<=\b(?:eyes|gaze|stare)\s+(?:(?:stay|stays|stayed|remain|remains|remained|linger|lingers|lingered|rest|rests|rested|settle|settles|settled|are|is|were|was)\s+)?(?:(?:still|fixed|locked|glued|trained|firmly|steadily|intently)\s+)*on\s+[^,.!?;\n"“”]{1,40}),\s+watching(?=\s*[,.;!?…"”*)\]—–]|\s*$)`,
             "giu",
         ),
         eternity: /\bwhat\s+(?:felt|feels|seemed|seems)\s+like\s+(?:an\s+)?eternity\b/gi,
@@ -334,6 +408,85 @@ export const ENTRIES = [
                 const verb = verbForm(pickFrom("verb", m), FORM[m[1].split(/\s+/)[0].toLowerCase()]);
                 if (verb) out.push({ start: m.index, end: m.index + m[0].length, text: verb });
             }
+            return out;
+        },
+    },
+    {
+        id: "meaning-tail",
+        label: "…, a silent promise",
+        example: "She squeezes his hand, a silent promise that she's here. → She squeezes his hand.  It was an unspoken apology. → removed",
+        find(text, g) {
+            const out = [];
+            for (const m of each(g.meaningSentence, text)) if (hasRest(text, m)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            for (const m of each(g.meaningBetween, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            for (const m of each(g.meaningEnd, text)) {
+                if (!MEANING_SURE_RE.test(m[0]) && ENDS_ON_THING.test(text.slice(Math.max(0, m.index - 40), m.index))) continue;
+                out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            }
+            return out;
+        },
+    },
+    {
+        id: "underneath",
+        label: "…, a little nervous underneath the bravado",
+        example: "She grins, curious, a little nervous underneath the bravado. → She grins, curious.  Her eyes stay on his face, watching, curious. → Her eyes stay on his face, curious.",
+        find(text, g) {
+            const out = [];
+            for (const re of [g.underneath, g.eyesWatching]) {
+                for (const m of each(re, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            }
+            return out;
+        },
+    },
+    {
+        id: "something-more",
+        label: "into something more X",
+        example: "her grin softening into something less performed → her grin softening; …, replaced by something more raw. → removed; plum blossoms and something warmer, muskier, fills → plum blossoms fills",
+        find(text, g) {
+            const out = [];
+            for (const m of each(g.somethingInto, text)) out.push({ start: m.index, end: m.index + m[0].length, text: m[1] });
+            for (const m of each(g.somethingReplaced, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            for (const m of each(g.somethingAnd, text)) {
+                if (!SENSE_RE.test(sentenceAround(text, m.index))) continue;
+                // A comma after the chain closes the subject ("…, fills the room"): it goes with
+                // the chain. Before "she / then / and …" it starts an aside, so it stays.
+                const end = m[1] && NOT_VERB_NEXT.test(m[2] || "") ? m.index + m[0].length - 1 : m.index + m[0].length;
+                out.push({ start: m.index, end, text: "" });
+            }
+            return out;
+        },
+    },
+    {
+        id: "tasting-word",
+        label: "like she's tasting the word",
+        example: "She repeats the word like she's tasting it, rolling it around. → She repeats the word.",
+        find(text, g) {
+            const out = [];
+            for (const m of each(g.tasting, text)) {
+                // Bare "it": only when the sentence is about words, not food.
+                if (m[1] && /^it$/i.test(m[1]) && !/\b(?:word|words|name|phrase|question|repeats?|repeated|repeating|echoe?s|echoed|says|said|asks|asked|speaks|spoke|murmurs|murmured|whispers|whispered)\b|["“]/i.test(sentenceAround(text, m.index))) continue;
+                out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            }
+            for (const m of each(g.rolling, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            return out;
+        },
+    },
+    {
+        id: "mouth-opens",
+        label: "her mouth opens, closes, opens again",
+        example: "Her mouth opens, closes, opens again. → removed (when the reply has more)",
+        find(text, g) {
+            return [...each(g.mouthOpens, text)].filter(m => hasRest(text, m)).map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
+        },
+    },
+    {
+        id: "shade-of",
+        label: "a deeper shade of pink",
+        example: "her cheeks flushing a deeper shade of pink that reaches all the way to her ears → her cheeks flushing pink to her ears",
+        find(text, g) {
+            const out = [];
+            for (const m of each(g.shade, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            for (const m of each(g.shadeReach, text)) out.push({ start: m.index, end: m.index + m[0].length, text: ` ${m[1].toLowerCase()}${m[2]}` });
             return out;
         },
     },

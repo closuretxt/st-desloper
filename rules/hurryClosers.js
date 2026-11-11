@@ -6,8 +6,9 @@
 //   "Here." She sets the bowl down. "Eat up, darling."    -> "Here." She sets the bowl down.
 //   "Drink your tea before it gets cold."                 -> "Drink your tea."  (the tail only)
 //   ...the door creaks open. What do you do?              -> ...the door creaks open.
-// Four parts, each with its own switch: food ("…before it gets cold"), waiting ("Don't keep me
-// waiting", "Tick tock"), handovers ("Your move.", "What do you say?") and the narrator's hook
+// Parts, each with its own switch: food ("…before it gets cold"), waiting ("Don't keep me
+// waiting", "Tick tock", "Come on."), handovers ("Your move.", "What do you say?"), dares ("Show me
+// what you've got.", "Prove it.") and the narrator's hook
 // ("What do you do?"), plus the made-up rush tail ("Lift me up before the claw warms up!" ->
 // "Lift me up!"), cut from speech like the cold-food tail.
 //
@@ -49,6 +50,13 @@ const WAITING = [
     String.raw`(?:we|we'd) (?:should|better|had better|ought to) (?:get going|get moving|head out|head back|go now|be going|hurry|get a move on)`,
     String.raw`(?:let's|let us) (?:get going|get moving|head out|hurry|get a move on)`,
     String.raw`(?:well,? )?i'm waiting`,
+    // A bare "Come on, kid." nudge: one word may follow as who it's said to.
+    String.raw`(?:come on|c'mon)(?:,? [a-z]+)?`,
+];
+// The dare a reply ends on: "Show me what you've got." Only at the end, like the others.
+const DARE = [
+    String.raw`${NUDGE}(?:show me|let's see|let me see)(?:,? then,?)? what you(?:'ve| have)?(?: really)? got`,
+    String.raw`${NUDGE}(?:prove it|impress me|dazzle me|bring it(?: on)?|do your worst|give it your best shot|give me your best shot|let's see you try)`,
 ];
 const HANDOVER = [
     String.raw`(?:so,? |well,? |now,? )?what are you waiting for`,
@@ -68,6 +76,7 @@ export const ENTRIES = [
     { id: "food", label: 'Food ("…before it gets cold!")', example: '"Sit. Eat before it gets cold!" → "Sit."  "Drink your tea before it gets cold." → "Drink your tea."' },
     { id: "waiting", label: 'Waiting ("Don\'t keep me waiting")', example: '"Come on. Hurry up, we\'ll be late." → "Come on."  Also "Tick tock.", "I don\'t have all day."' },
     { id: "handover", label: 'Handovers ("Your move.")', example: '"Here\'s the map. Your move." → "Here\'s the map."  Also "What do you say?", "Well?"' },
+    { id: "dare", label: 'Dares ("Show me what you\'ve got.")', example: '"Not bad. Show me what you\'ve got." → "Not bad."  Also "Prove it.", "Impress me.", "Do your worst."' },
     { id: "rush", label: 'Made-up rush ("…before it sells out!")', example: '"Lift me up before the claw warms up!" → "Lift me up!"  Also "…before someone else grabs it", "…before the line gets long".' },
     { id: "hook", label: 'Narrator\'s hook ("What do you do?")', example: "…the door creaks open. What do you do? → …the door creaks open.  Only as the reply's last sentence." },
 ];
@@ -86,7 +95,7 @@ function matchers(names) {
     // over-explained errand ("Hurry up and unlock the door, my keys are on the shelf by the
     // window!"); a short line before it ("Well?!") already says she wants in (user, 2026-11-09).
     const opener = re(String.raw`${LEAD}${NUDGE}hurry(?: up)?(?: and\b|,\s)`);
-    const m = { food: whole(FOOD), waiting: [...whole(WAITING), opener], handover: whole(HANDOVER), hook: whole(HOOK) };
+    const m = { food: whole(FOOD), waiting: [...whole(WAITING), opener], handover: whole(HANDOVER), dare: whole(DARE), hook: whole(HOOK) };
     if (cache.size > 20) cache.clear();
     cache.set(key, m);
     return m;
@@ -134,7 +143,7 @@ export default {
         const sents = sentencesAt(text);
         if (!sents.length) return text;
         const m = matchers(ctx.names);
-        const parts = speech ? ["food", "waiting", "handover"] : ["hook"];
+        const parts = speech ? ["food", "waiting", "handover", "dare"] : ["hook"];
         const kindOf = s => {
             const l = looseOf(s.text);
             return parts.find(p => !off.has(p) && m[p].some(r => r.test(l)));

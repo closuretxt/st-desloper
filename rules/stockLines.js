@@ -5,6 +5,8 @@
 //   "Unlike most people, you came back."        -> "You came back."
 //   "No one has ever asked me that before."     -> removed (switchable: sometimes it's true)
 //   "You can't just say that!" She laughs.      -> She laughs.
+//   …she leans into him. And for now, that was enough.  -> …she leans into him.  (narration,
+//                                                  only as the reply's last line)
 // The shared repair step fixes what's left: an emptied quote goes and its attribution's action
 // stays ('"You can't just say that!" she says, turning red.' -> "She turns red.").
 //
@@ -13,7 +15,13 @@
 // can't do that!"), "How could you say that?" without "so casually" (can be real hurt), and a
 // reply that is nothing but the line.
 
-import { sentencesAt, plainOf, looseOf, LEAD, sentenceEdit, applyEdits, offSet } from "../core/speech.js";
+import { sentencesAt, plainOf, looseOf, LEAD, sentenceEdit, applyEdits, offSet, othersHaveText } from "../core/speech.js";
+
+// This segment is the reply's last text (nothing after it but blanks).
+function lastText(ctx) {
+    const seg = ctx.segment;
+    return !!seg && !(seg.segments || []).slice(seg.index + 1).some(s => String(s.text ?? "").trim());
+}
 
 const END = String.raw`[.!?…~]*$`;
 const re = s => new RegExp(s, "u");
@@ -50,6 +58,34 @@ const PROTEST = [
     re(String.raw`${LEAD}how (?:can|could) you (?:just )?(?:say|ask) ${WHAT} ${HOW}(?: ${HOW})*${END}`),
 ];
 
+// ---- moral closers ---------------------------------------------------------------------
+// The narrator's last line summing up the feeling: "And for now, that was enough." Only as the
+// reply's very last sentence, in narration, with something before it. "It was fine." alone can be
+// an answer, so the soft words (okay / fine) need a "for now"-type lead.
+const SOFT = String.raw`(?:for now|for once|for tonight|for the moment|for this moment|in that moment|right now|tonight|somehow|maybe|perhaps|just this once|for today|in the end|at least for now|and for now)`;
+const BE = String.raw`(?:'s| is| was| would be| would have to be| had to be| will be| felt like| feels like| seemed| seems)`;
+const MORAL = [
+    re(String.raw`^(?:and |but )?(?:${SOFT},? )*(?:that|this|it)${BE} (?:all that mattered|all that matters|what mattered|what matters|all (?:she|he|they|i|we) (?:needed|need|wanted|could ask for))(?: for now)?${END}`),
+    re(String.raw`^(?:(?:and |but )(?:${SOFT},? )*|(?:and |but )?(?:${SOFT},? )+)(?:that|this|it)${BE} (?:enough|everything)(?: for now)?${END}`),
+    re(String.raw`^(?:and |but )?(?:that|this|it)(?: would have to be| had to be) enough${END}`),
+    re(String.raw`^(?:and |but )?(?:${SOFT},? )+(?:that|this|it)(?:'s| is| was| felt| feels) (?:okay|ok|alright|all right|fine)${END}`),
+    re(String.raw`^(?:and |but )?(?:${SOFT},? )*nothing else (?:mattered|matters)${END}`),
+    re(String.raw`^(?:and |but )?(?:${SOFT},? )*(?:that|it) (?:made|makes) all the difference${END}`),
+    re(String.raw`^(?:and |but )?(?:${SOFT},? )*(?:she|he|they|i|we) (?:wouldn't|would not) have (?:it|had it) any other way${END}`),
+];
+
+// ---- grudging yes, and the debt that closes it -----------------------------------------
+// "Fine. Since you asked so nicely." The "Fine." is the answer; the quip after it is the habit.
+const NICELY = String.raw`(?:(?:but|and)\s+)?(?:only\s+|just\s+)?(?:since|because|cause|'cause|cuz)\s+you\s+asked\s+(?:so\s+|very\s+|real\s+)?(?:nicely|politely|sweetly|kindly)`;
+const NICELY_LINE = re(String.raw`^${NICELY}${END}`);
+const NICELY_TAIL = new RegExp(String.raw`,\s+${NICELY}(?=[.!?…~]*[*_]?$)`, "iu");
+// "But you owe me a big dinner after this. The fancy one with the cake." A favour turned into a
+// debt as the quote's last word, then a detail about it. Only when nothing but such details
+// follows to the end of the quote: "You owe me. I saved your life." is an argument and stays.
+const OWE = re(String.raw`^(?:(?:but|and|oh,? and|just so you know,?|of course,?)\s+)?(?:you(?:'ll|'re going to| will)?\s+(?:so\s+|totally\s+|definitely\s+)?owe\s+me|this means you owe me|you(?:'re| are) (?:so )?(?:buying|paying for|treating me to))\b`);
+// A detail fragment: short, and no one doing anything ("The fancy one with the whole fish.").
+const DETAIL = s => s.split(/\s+/).length <= 14 && !/\b(?:i|you|we|he|she|they|it|i'm|you're|we're|it's|that's|let's)\b/.test(s);
+
 // Hurry and handover closers ("Eat before it gets cold!") have their own rule: rules/hurryClosers.js.
 
 export const ENTRIES = [
@@ -67,6 +103,21 @@ export const ENTRIES = [
         id: "protest",
         label: '"You can\'t just say that!"',
         example: '"You can\'t just say that!" She laughs. → She laughs.  ("You can\'t do that!" stays: a real refusal)',
+    },
+    {
+        id: "moral-closer",
+        label: '"And for now, that was enough."',
+        example: "…she rests her head on his shoulder. And for now, that was enough. → …she rests her head on his shoulder.  Only as the reply's last line; also \"Nothing else mattered.\"",
+    },
+    {
+        id: "asked-nicely",
+        label: '"Fine. Since you asked so nicely."',
+        example: '"Fine. Since you asked so nicely." → "Fine."  "Fine, since you asked so nicely." → "Fine."',
+    },
+    {
+        id: "owe-me",
+        label: '"But you owe me a big dinner."',
+        example: '"Okay. But you owe me a big dinner after this. The fancy one with the cake." → "Okay."  Only as the quote\'s last line; "You owe me. I saved your life." stays.',
     },
 ];
 
@@ -104,8 +155,35 @@ export default {
             return l.split(/\s+/).length <= 6 && LEANS.test(l);
         };
 
+        // A debt closer: the owe line plus the detail fragments after it, to the quote's end.
+        let oweFrom = -1;
+        if (speech && !off.has("owe-me")) {
+            for (let i = 0; i < sents.length; i++) {
+                if (!OWE.test(looseOf(sents[i].text))) continue;
+                if (sents.slice(i + 1).every(x => DETAIL(looseOf(x.text)))) {
+                    oweFrom = i;
+                    break;
+                }
+            }
+        }
+
         sents.forEach((s, i) => {
             const l = looseOf(s.text);
+            if (oweFrom >= 0 && i >= oweFrom) {
+                edits.push(sentenceEdit(s, { kind: "owe-me", label: ENTRIES[5].label }));
+                return;
+            }
+            if (speech && !off.has("asked-nicely")) {
+                if (NICELY_LINE.test(l) && sents.length > 1) {
+                    edits.push(sentenceEdit(s, { kind: "asked-nicely", label: ENTRIES[4].label }));
+                    return;
+                }
+                const t = NICELY_TAIL.exec(s.text.replace(/[’‘]/g, "'"));
+                if (t) {
+                    edits.push({ start: s.start + t.index, end: s.start + t.index + t[0].length, text: "", kind: "asked-nicely", label: ENTRIES[4].label });
+                    return;
+                }
+            }
             if (!off.has("most-people")) {
                 if (MOST.some(r => r.test(l)) && !PLACE.test(l) && nearYou(i) && !leansNext(i)) {
                     edits.push(sentenceEdit(s, { kind: "most-people", label: ENTRIES[0].label }));
@@ -129,6 +207,14 @@ export default {
             }
             if (speech && !off.has("protest") && PROTEST.some(r => r.test(l))) {
                 edits.push(sentenceEdit(s, { kind: "protest", label: ENTRIES[2].label }));
+                return;
+            }
+            if (!speech && !off.has("moral-closer") && i === sents.length - 1 && lastText(ctx) && (i > 0 || othersHaveText(ctx)) && MORAL.some(r => r.test(l))) {
+                // The space before it goes too, so no blank line is left at the reply's end.
+                const prev = sents[i - 1];
+                const e = sentenceEdit(s, { kind: "moral-closer", label: ENTRIES[3].label });
+                if (prev) e.start = prev.end;
+                edits.push(e);
             }
         });
         return applyEdits(text, edits, ctx);

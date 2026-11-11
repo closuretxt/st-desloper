@@ -276,7 +276,10 @@ function negatedEdit(text, m, g, opt) {
     // takes "For a moment, she doesn't move." and "…, though she doesn't look away.", and drops
     // emphasis the flip makes pointless ("at all", "for a single second").
     if (!punct || opt.mode === "leave" || /[,;:—–]/.test(clause) || !tense) return null;
-    const wholeSentence = SENTENCE_START.test(before) && /^[A-Z]/.test(subject);
+    // "But she doesn't pull away." is a whole sentence too: the opener stays with a flip ("But she
+    // stays close.") and goes with a delete.
+    const opener = SENTENCE_OPENER.exec(before);
+    const wholeSentence = (SENTENCE_START.test(before) && /^[A-Z]/.test(subject)) || !!opener;
     if (!wholeSentence && !LEAD_PHRASE.test(before) && !CONTRAST_TAG.test(before)) return null;
     const phrase = clause.trim().toLowerCase().replace(/\s+/g, " ");
     const key = opt.flips.has(phrase) ? phrase : phrase.replace(INTENSIFIER, "");
@@ -292,7 +295,9 @@ function negatedEdit(text, m, g, opt) {
         return null;
     }
     if (wholeSentence && opt.mode === "flip+delete" && opt.deleteVerbs.has(phrase)) {
-        return cut(subjStart, end + punct.length, MARK, "delete");
+        const edit = cut(subjStart, end + punct.length, MARK, "delete");
+        if (opener) edit.start = edit.hitStart = subjStart - opener[1].length;
+        return edit;
     }
     return null;
 }
