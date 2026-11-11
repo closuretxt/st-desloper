@@ -1,0 +1,11 @@
+{
+    "display_name": "ST Desloper",
+    "loading_order": 6,
+    "requires": [],
+    "optional": [],
+    "js": "index.js",
+    "css": "style.css",
+    "generate_interceptor": "st_desloper_intercept",
+    "author": "closuretxt",
+    "version": "0.1.0"
+}

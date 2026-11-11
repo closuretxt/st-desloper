@@ -1,0 +1,8 @@
+# File
+/.vscode
+*.log
+*.txt
+!/.tests/fixtures/*.txt
+/docs
+CLAUDE.md
+.tests

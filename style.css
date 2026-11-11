@@ -1,0 +1,1414 @@
+/* ===================== ST Desloper =====================
+   One look for the drawer, the fixes popup and the stats: glassy cards over ST's own blur,
+   colours taken from the user's theme (body colour for the glass so light themes work too,
+   the quote colour as the accent). */
+
+.st-desloper-settings {
+    --sd-line: var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.12));
+    --sd-line-soft: color-mix(in srgb, var(--SmartThemeBodyColor, #ddd) 8%, transparent);
+    --sd-accent: var(--SmartThemeQuoteColor, #b8912f);
+    --sd-accent-soft: color-mix(in srgb, var(--sd-accent) 22%, transparent);
+    --sd-glass: color-mix(in srgb, var(--SmartThemeBodyColor, #ddd) 4%, transparent);
+    --sd-glass-hover: color-mix(in srgb, var(--SmartThemeBodyColor, #ddd) 7%, transparent);
+    --sd-well: rgba(0, 0, 0, 0.2);
+    --sd-ok: #5fb87f;
+    --sd-warn: var(--warning, #e5a50a);
+    --sd-radius: 8px;
+    --sd-muted: 0.62;
+}
+
+/* ---------- Shared pieces ---------- */
+
+/* The display rules below would otherwise beat the hidden attribute. */
+.st-desloper-settings [hidden] {
+    display: none !important;
+}
+
+.st-desloper-settings .sd_note {
+    font-size: 0.82em;
+    opacity: var(--sd-muted);
+    line-height: 1.35;
+}
+
+.st-desloper-settings .sd_hint {
+    display: block;
+    font-size: 0.82em;
+    opacity: 0.55;
+    font-weight: normal;
+    line-height: 1.3;
+}
+
+.st-desloper-settings .sd_badge {
+    display: inline-block;
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: var(--sd-well);
+    border: 1px solid var(--sd-line-soft);
+    white-space: nowrap;
+    opacity: 0.85;
+}
+
+.st-desloper-settings .sd_badge:empty {
+    display: none;
+}
+
+.st-desloper-settings .sd_section_head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.st-desloper-settings .sd_section_title {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.st-desloper-settings .sd_section_title i {
+    color: var(--sd-accent);
+    opacity: 0.9;
+}
+
+.st-desloper-settings .sd_arrow {
+    color: var(--sd-accent);
+    font-weight: bold;
+}
+
+.st-desloper-settings .sd_mono {
+    font-family: var(--monoFontFamily, monospace);
+}
+
+.st-desloper-settings .sd_error {
+    color: var(--sd-warn);
+    font-size: 0.82em;
+}
+
+.st-desloper-settings .sd_empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 22px 12px;
+    text-align: center;
+    font-size: 0.88em;
+    opacity: 0.6;
+    border: 1px dashed var(--sd-line);
+    border-radius: var(--sd-radius);
+}
+
+.st-desloper-settings .sd_empty i {
+    font-size: 1.6em;
+    opacity: 0.7;
+}
+
+.st-desloper-settings .text_pole {
+    margin: 0;
+}
+
+.st-desloper-settings .sd_textarea {
+    resize: vertical;
+    min-height: 2.4em;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.st-desloper-settings .sd_buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.st-desloper-settings .menu_button {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+    padding: 5px 12px;
+    width: auto;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .menu_button.sd_button_main {
+    border-color: color-mix(in srgb, var(--sd-accent) 55%, var(--sd-line));
+    background-color: var(--sd-accent-soft);
+}
+
+.st-desloper-settings .menu_button.sd_button_main:hover {
+    background-color: color-mix(in srgb, var(--sd-accent) 34%, transparent);
+}
+
+.st-desloper-settings .sd_link,
+.st-desloper-settings .sd_icon_button,
+.st-desloper-settings .sd_pill_button,
+.st-desloper-settings .sd_seg,
+.st-desloper-settings .sd_tab {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    margin: 0;
+    cursor: pointer;
+}
+
+.st-desloper-settings .sd_link {
+    font-size: 0.8em;
+    padding: 2px 4px;
+    opacity: 0.65;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+}
+
+.st-desloper-settings .sd_link:hover {
+    opacity: 1;
+}
+
+.st-desloper-settings .sd_icon_button {
+    padding: 5px 7px;
+    border-radius: 6px;
+    opacity: 0.5;
+    font-size: 0.85em;
+}
+
+.st-desloper-settings .sd_icon_button:hover {
+    opacity: 1;
+    color: var(--sd-warn);
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_pill_button {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.78em;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 55%, transparent);
+    background: var(--sd-accent-soft);
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_pill_button:hover {
+    background: color-mix(in srgb, var(--sd-accent) 36%, transparent);
+}
+
+/* Switch: a pill toggle instead of ST's square box. The extra classes out-rank ST's
+   input[type='checkbox'] rules (size, tick clip-path, scale(0) knob). */
+.st-desloper-settings input[type="checkbox"].sd_switch {
+    -webkit-appearance: none;
+    appearance: none;
+    position: relative;
+    display: inline-block;
+    flex: 0 0 auto;
+    width: 2.15em;
+    height: 1.2em;
+    margin: 0;
+    padding: 0;
+    border-radius: 999px;
+    border: 1px solid var(--sd-line);
+    outline: none;
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.45);
+    filter: none;
+    transform: none;
+    overflow: visible;
+    cursor: pointer;
+    transition: background-color 0.18s, border-color 0.18s;
+}
+
+.st-desloper-settings input[type="checkbox"].sd_switch::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0.14em;
+    width: 0.86em;
+    height: 0.86em;
+    border-radius: 50%;
+    clip-path: none;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+    background: var(--SmartThemeBodyColor, #ddd);
+    opacity: 0.55;
+    transform: translateY(-50%);
+    transition: left 0.18s, opacity 0.18s;
+}
+
+.st-desloper-settings input[type="checkbox"].sd_switch:checked {
+    background: color-mix(in srgb, var(--sd-accent) 62%, transparent);
+    border-color: color-mix(in srgb, var(--sd-accent) 80%, transparent);
+}
+
+.st-desloper-settings input[type="checkbox"].sd_switch:checked::before {
+    left: calc(100% - 1em);
+    opacity: 1;
+    transform: translateY(-50%);
+}
+
+.st-desloper-settings input[type="checkbox"].sd_switch:focus-visible {
+    outline: 2px solid var(--sd-accent);
+    outline-offset: 2px;
+}
+
+.st-desloper-settings .sd_switch_label {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* Both | Screen | Model */
+.st-desloper-settings .sd_segmented {
+    display: inline-flex;
+    flex: 0 0 auto;
+    gap: 2px;
+    padding: 2px;
+    border-radius: 999px;
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-well);
+}
+
+.st-desloper-settings .sd_seg {
+    font-size: 0.76em;
+    padding: 2px 9px;
+    border-radius: 999px;
+    opacity: 0.55;
+    white-space: nowrap;
+    transition: background-color 0.15s, opacity 0.15s;
+}
+
+.st-desloper-settings .sd_seg:hover {
+    opacity: 0.9;
+}
+
+.st-desloper-settings .sd_seg.sd_active {
+    opacity: 1;
+    background: color-mix(in srgb, var(--sd-accent) 32%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sd-accent) 60%, transparent);
+}
+
+/* ---------- Settings drawer ---------- */
+
+.st-desloper-settings .sd_drawer {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding-top: 6px;
+}
+
+.st-desloper-settings .sd_master {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    padding: 8px 12px;
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-glass);
+}
+
+.st-desloper-settings .sd_master_main {
+    font-weight: 600;
+}
+
+.st-desloper-settings .sd_section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid var(--sd-line-soft);
+}
+
+/* Natural-width chips that wrap: no name gets cut, and short names don't waste a column. */
+.st-desloper-settings .sd_quick {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.st-desloper-settings .sd_chip {
+    flex: 0 1 auto;
+    max-width: 100%;
+    min-width: 0;
+    padding: 5px 9px;
+    font-size: 0.86em;
+    border-radius: 6px;
+    border: 1px solid transparent;
+    background: var(--sd-glass);
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.st-desloper-settings .sd_chip:hover {
+    border-color: var(--sd-line-soft);
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_chip_name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.st-desloper-settings .sd_chip.sd_off .sd_chip_name {
+    opacity: 0.45;
+}
+
+.st-desloper-settings .sd_chip_where {
+    font-size: 0.8em;
+    opacity: 0.55;
+}
+
+.st-desloper-settings .sd_stats_row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 12px;
+}
+
+.st-desloper-settings .sd_quick_patterns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 0.86em;
+    border-radius: 6px;
+    border: 1px dashed var(--sd-line);
+    cursor: pointer;
+    transition: background-color 0.15s;
+}
+
+.st-desloper-settings .sd_quick_patterns:hover {
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_quick_patterns > i:first-child {
+    color: var(--sd-accent);
+}
+
+.st-desloper-settings .sd_quick_patterns_go {
+    margin-left: auto;
+    font-size: 0.8em;
+    opacity: 0.5;
+}
+
+/* ---------- Popups (fixes and stats) ---------- */
+
+.st-desloper-settings.sd_popup {
+    text-align: left;
+}
+
+.st-desloper-settings .sd_popup_title {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 2px 2px 8px;
+}
+
+.st-desloper-settings .sd_popup_name {
+    font-size: 1.15em;
+    font-weight: 700;
+}
+
+.st-desloper-settings .sd_toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    padding: 8px 12px;
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-glass);
+}
+
+.st-desloper-settings .sd_toolbar_end {
+    display: flex;
+    gap: 6px;
+    margin-left: auto;
+}
+
+.st-desloper-settings .sd_control {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin: 0;
+}
+
+.st-desloper-settings .sd_control_label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_select {
+    width: auto;
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_number {
+    width: 4.8em;
+    flex: 0 0 auto;
+    text-align: center;
+}
+
+/* Tabs */
+.st-desloper-settings .sd_tabs {
+    display: flex;
+    gap: 2px;
+    border-bottom: 1px solid var(--sd-line);
+}
+
+.st-desloper-settings .sd_tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 12px;
+    margin-bottom: -1px;
+    border-bottom: 2px solid transparent;
+    opacity: 0.6;
+    transition: opacity 0.15s, border-color 0.15s;
+}
+
+.st-desloper-settings .sd_tab:hover {
+    opacity: 0.9;
+}
+
+.st-desloper-settings .sd_tab.sd_active {
+    opacity: 1;
+    border-bottom-color: var(--sd-accent);
+}
+
+.st-desloper-settings .sd_tab.sd_active i {
+    color: var(--sd-accent);
+}
+
+.st-desloper-settings .sd_tab_count {
+    font-size: 0.72em;
+    padding: 0 7px;
+    border-radius: 999px;
+    background: var(--sd-well);
+}
+
+.st-desloper-settings .sd_tab_count:empty {
+    display: none;
+}
+
+/* Cards: the built-in fixes, your patterns, the stats sections. */
+.st-desloper-settings .sd_card_list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.st-desloper-settings .sd_card {
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-glass);
+    transition: background-color 0.15s, border-color 0.15s;
+}
+
+.st-desloper-settings .sd_card_list .sd_card:hover,
+.st-desloper-settings .sd_card.sd_open {
+    border-color: var(--sd-line);
+}
+
+.st-desloper-settings .sd_card.sd_open {
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_card_head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    cursor: pointer;
+}
+
+.st-desloper-settings .sd_card_title {
+    flex: 1;
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_card_name {
+    display: block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.st-desloper-settings .sd_card_desc {
+    font-size: 0.8em;
+    opacity: 0.58;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.st-desloper-settings .sd_card_desc:empty {
+    display: none;
+}
+
+.st-desloper-settings .sd_rule.sd_open .sd_card_head .sd_card_desc {
+    display: none;
+}
+
+.st-desloper-settings .sd_card_about {
+    margin-bottom: 12px;
+    padding: 7px 10px;
+    font-size: 0.84em;
+    line-height: 1.45;
+    border-left: 2px solid var(--sd-accent);
+    border-radius: 0 6px 6px 0;
+    background: var(--sd-well);
+    opacity: 0.88;
+}
+
+.st-desloper-settings .sd_card.sd_off .sd_card_title {
+    opacity: 0.45;
+}
+
+.st-desloper-settings .sd_chevron {
+    flex: 0 0 auto;
+    font-size: 0.75em;
+    opacity: 0.45;
+    transition: transform 0.2s;
+}
+
+.st-desloper-settings .sd_card.sd_open .sd_chevron {
+    transform: rotate(180deg);
+}
+
+.st-desloper-settings .sd_card_body {
+    display: none;
+    margin: 0 10px;
+    padding: 10px 0 12px;
+    border-top: 1px solid var(--sd-line-soft);
+}
+
+.st-desloper-settings .sd_card.sd_open .sd_card_body {
+    display: block;
+}
+
+/* Option fields: two columns when there's room; lists and phrase tables span both. */
+.st-desloper-settings .sd_fields {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 10px 18px;
+}
+
+.st-desloper-settings .sd_fields + .sd_fields {
+    margin-top: 12px;
+}
+
+.st-desloper-settings .sd_field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    margin: 0;
+}
+
+.st-desloper-settings .sd_field_label {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    font-size: 0.88em;
+}
+
+.st-desloper-settings .sd_field_inline .text_pole {
+    flex: 0 1 55%;
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_field_check {
+    align-items: flex-start;
+}
+
+.st-desloper-settings .sd_field_check .sd_switch {
+    margin-top: 0.1em;
+}
+
+.st-desloper-settings .sd_field_stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+}
+
+.st-desloper-settings .sd_field_wide {
+    grid-column: 1 / -1;
+}
+
+.st-desloper-settings .sd_checks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    font-size: 0.86em;
+}
+
+/* Stock phrases inside their card */
+.st-desloper-settings details > summary {
+    list-style: none;
+}
+
+.st-desloper-settings details > summary::-webkit-details-marker {
+    display: none;
+}
+
+.st-desloper-settings .sd_summary_chevron {
+    font-size: 0.7em;
+    opacity: 0.5;
+    transition: transform 0.2s;
+}
+
+.st-desloper-settings details[open] > summary .sd_summary_chevron {
+    transform: rotate(90deg);
+}
+
+.st-desloper-settings .sd_phrases {
+    border-radius: 6px;
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-well);
+}
+
+.st-desloper-settings .sd_phrases > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 7px 10px;
+    font-size: 0.88em;
+    cursor: pointer;
+}
+
+.st-desloper-settings .sd_phrases > summary .sd_hint {
+    flex-basis: 100%;
+    padding-left: 1.4em;
+}
+
+.st-desloper-settings .sd_phrase_list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 6px;
+    padding: 0 8px 8px;
+}
+
+.st-desloper-settings .sd_phrase {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 7px 9px;
+    border-radius: 6px;
+    background: var(--sd-glass);
+}
+
+.st-desloper-settings .sd_phrase_name {
+    font-size: 0.88em;
+    font-weight: 600;
+}
+
+.st-desloper-settings .sd_phrase_example {
+    font-size: 0.78em;
+    opacity: 0.55;
+    font-style: italic;
+}
+
+.st-desloper-settings .sd_phrase_pool {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.st-desloper-settings .sd_phrase_pool_label {
+    flex: 0 0 auto;
+    font-size: 0.75em;
+    opacity: 0.6;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.st-desloper-settings .sd_phrase_pool .text_pole {
+    flex: 1;
+    min-width: 0;
+    font-size: 0.85em;
+    padding: 3px 6px;
+}
+
+/* ---------- Fixes popup layout ---------- */
+
+/* Wider than ST's "wide" popup (the chat column's width): room for the tester column. */
+.popup.sd_popup_dialog {
+    width: min(1180px, 94dvw);
+    min-width: min(var(--sheldWidth, 700px), 94dvw);
+}
+
+.sd_fx_dialog .popup-content {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.st-desloper-settings.sd_fx {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: 10px;
+}
+
+.st-desloper-settings .sd_fx_body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 14px;
+}
+
+.st-desloper-settings .sd_fx_main,
+.st-desloper-settings .sd_fx_tester {
+    min-height: 0;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.st-desloper-settings.sd_fx .sd_pane {
+    display: none;
+}
+
+.st-desloper-settings.sd_fx[data-tab="fixes"] [data-pane="fixes"],
+.st-desloper-settings.sd_fx[data-tab="patterns"] [data-pane="patterns"] {
+    display: flex;
+}
+
+.st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
+    display: none;
+}
+
+.st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_tester {
+    display: flex;
+}
+
+.st-desloper-settings.sd_fx section.sd_pane {
+    flex-direction: column;
+    gap: 8px;
+}
+
+.st-desloper-settings.sd_fx .sd_toolbar {
+    padding: 0 2px;
+    border: 0;
+    background: none;
+}
+
+/* Wide popup: the tester becomes a column beside the list, and its tab goes away. */
+@container (min-width: 860px) {
+    .st-desloper-settings .sd_fx_body {
+        grid-template-columns: minmax(0, 1fr) minmax(300px, 36%);
+    }
+
+    .st-desloper-settings.sd_fx .sd_fx_tester,
+    .st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
+        display: flex;
+    }
+
+    .st-desloper-settings.sd_fx[data-tab="tester"] [data-pane="fixes"] {
+        display: flex;
+    }
+
+    .st-desloper-settings.sd_fx .sd_tab_tester {
+        display: none;
+    }
+}
+
+/* Narrow: "Both / Screen / Model" takes the description's line under the name instead of
+   squeezing the name; the description shows once the card is open. */
+@container (max-width: 560px) {
+    .st-desloper-settings .sd_card_head {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
+        grid-template-areas:
+            "sw title del chev"
+            ". seg seg seg";
+        row-gap: 5px;
+    }
+
+    .st-desloper-settings .sd_card_head > .sd_switch {
+        grid-area: sw;
+    }
+
+    .st-desloper-settings .sd_card_head > .sd_card_title {
+        grid-area: title;
+    }
+
+    .st-desloper-settings .sd_card_head > .sd_segmented {
+        grid-area: seg;
+        justify-self: start;
+    }
+
+    .st-desloper-settings .sd_card_head > .sd_icon_button {
+        grid-area: del;
+    }
+
+    .st-desloper-settings .sd_card_head > .sd_chevron {
+        grid-area: chev;
+    }
+
+    .st-desloper-settings .sd_card:not(.sd_open) .sd_card_desc {
+        display: none;
+    }
+
+    .st-desloper-settings.sd_fx .sd_toolbar_end {
+        margin-left: 0;
+    }
+
+    .st-desloper-settings .sd_tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .st-desloper-settings .sd_tab {
+        padding: 7px 9px;
+        white-space: nowrap;
+    }
+
+    .st-desloper-settings .sd_tab > i {
+        display: none;
+    }
+}
+
+/* Tester */
+/* Children keep their size: in a scrolling flex column they'd otherwise squash the textareas. */
+.st-desloper-settings .sd_fx_tester > *,
+.st-desloper-settings.sd_fx section.sd_pane > * {
+    flex-shrink: 0;
+}
+
+.st-desloper-settings .sd_tester_input {
+    min-height: 8em;
+}
+
+.st-desloper-settings .sd_fx_tester {
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-glass);
+}
+
+.st-desloper-settings .sd_tester_row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 10px;
+}
+
+.st-desloper-settings .sd_tester_row .sd_field_label {
+    flex: 0 0 auto;
+}
+
+.st-desloper-settings .sd_tester_output {
+    min-height: 4em;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-well);
+    white-space: pre-wrap;
+    word-break: break-word;
+    line-height: 1.45;
+}
+
+.st-desloper-settings .sd_tester_output:empty::before {
+    content: "The cleaned text shows here.";
+    opacity: 0.45;
+    font-style: italic;
+}
+
+.st-desloper-settings .sd_tester_hits {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.84em;
+}
+
+.st-desloper-settings .sd_tester_hits li {
+    padding: 5px 9px;
+    border-left: 2px solid var(--sd-accent);
+    border-radius: 0 6px 6px 0;
+    background: var(--sd-glass);
+}
+
+.st-desloper-settings .sd_hit_rule {
+    font-size: 0.82em;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    opacity: 0.8;
+}
+
+.st-desloper-settings .sd_hit_before {
+    text-decoration: line-through;
+    opacity: 0.6;
+}
+
+.st-desloper-settings .sd_tester_notes {
+    font-size: 0.78em;
+    opacity: 0.5;
+    white-space: pre-wrap;
+}
+
+.st-desloper-settings .sd_tester_notes:empty {
+    display: none;
+}
+
+/* ---------- Stats ---------- */
+
+.st-desloper-settings.sd_stats {
+    container-type: inline-size;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Two columns of metric cards on a wide popup; the hero and the long-quote cards span both. */
+.st-desloper-settings .sd_stats_body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 10px;
+}
+
+@container (min-width: 860px) {
+    .st-desloper-settings .sd_stats_body {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .st-desloper-settings .sd_stats_body > .sd_hero,
+    .st-desloper-settings .sd_stats_body > .sd_span,
+    .st-desloper-settings .sd_stats_body > .sd_empty,
+    .st-desloper-settings .sd_stats_body > .sd_stats_foot {
+        grid-column: 1 / -1;
+    }
+}
+
+.st-desloper-settings .sd_pin_inputs {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.st-desloper-settings .sd_hero {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 14px 16px;
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--sd-accent) 10%, transparent), var(--sd-glass) 55%);
+}
+
+/* Score ring: a conic sweep masked to a ring, so the centre stays see-through glass. */
+.st-desloper-settings .sd_ring {
+    --sd-p: 0;
+    position: relative;
+    flex: 0 0 auto;
+    width: 108px;
+    height: 108px;
+    display: grid;
+    place-items: center;
+}
+
+.st-desloper-settings .sd_ring::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--sd-accent) calc(var(--sd-p) * 1%), color-mix(in srgb, var(--SmartThemeBodyColor, #ddd) 10%, transparent) 0);
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 9px));
+    mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 9px));
+}
+
+.st-desloper-settings .sd_ring_inner {
+    text-align: center;
+}
+
+.st-desloper-settings .sd_ring_num {
+    font-size: 2em;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.st-desloper-settings .sd_ring_label {
+    margin-top: 3px;
+    font-size: 0.66em;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.6;
+}
+
+.st-desloper-settings .sd_hero_side {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.st-desloper-settings .sd_hero_title {
+    font-size: 1.1em;
+    font-weight: 700;
+}
+
+.st-desloper-settings .sd_hero_line {
+    font-size: 0.86em;
+    opacity: 0.8;
+}
+
+.st-desloper-settings .sd_tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(118px, 170px));
+    gap: 6px;
+}
+
+.st-desloper-settings .sd_tile {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-well);
+}
+
+.st-desloper-settings .sd_tile_value {
+    font-size: 1.2em;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
+.st-desloper-settings .sd_tile_label {
+    font-size: 0.7em;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    opacity: 0.58;
+}
+
+.st-desloper-settings .sd_delta_up {
+    color: var(--sd-warn);
+}
+
+.st-desloper-settings .sd_delta_down {
+    color: var(--sd-ok);
+}
+
+.st-desloper-settings .sd_stats_card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+}
+
+.st-desloper-settings .sd_metrics {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+.st-desloper-settings .sd_metrics td {
+    padding: 6px 6px;
+    border-top: 1px solid var(--sd-line-soft);
+    vertical-align: middle;
+}
+
+.st-desloper-settings .sd_metrics tr:first-child td {
+    border-top: 0;
+}
+
+.st-desloper-settings .sd_metric {
+    cursor: pointer;
+    transition: background-color 0.12s;
+}
+
+.st-desloper-settings .sd_metric:hover,
+.st-desloper-settings .sd_metric.sd_open {
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_metric_label {
+    width: 100%;
+}
+
+.st-desloper-settings .sd_metric_label .sd_hint {
+    padding-left: 1.5em;
+}
+
+.st-desloper-settings .sd_row_chevron {
+    width: 1.5em;
+    font-size: 0.65em;
+    opacity: 0.4;
+    transition: transform 0.2s;
+}
+
+.st-desloper-settings .sd_metric.sd_open .sd_row_chevron {
+    transform: rotate(90deg);
+}
+
+.st-desloper-settings .sd_metric_value {
+    font-weight: 700;
+    font-size: 1.05em;
+    white-space: nowrap;
+    text-align: right;
+    min-width: 3.5em;
+}
+
+.st-desloper-settings .sd_metric_base {
+    font-size: 0.88em;
+    opacity: 0.55;
+    white-space: nowrap;
+    text-align: right;
+}
+
+.st-desloper-settings .sd_metric_status {
+    text-align: right;
+}
+
+.st-desloper-settings .sd_metric_detail > td {
+    padding: 4px 10px 10px 2em;
+    border-top: 0;
+    background: var(--sd-glass-hover);
+}
+
+.st-desloper-settings .sd_status {
+    font-size: 0.75em;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 999px;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_status_worse {
+    color: var(--sd-warn);
+}
+
+.st-desloper-settings .sd_status_better {
+    color: var(--sd-ok);
+}
+
+.st-desloper-settings .sd_status_moved {
+    opacity: 0.75;
+}
+
+.st-desloper-settings .sd_spark {
+    display: block;
+    opacity: 0.75;
+    color: var(--sd-accent);
+}
+
+.st-desloper-settings .sd_examples {
+    margin: 2px 0;
+    padding-left: 1.2em;
+    font-size: 0.88em;
+    line-height: 1.45;
+}
+
+.st-desloper-settings .sd_examples li {
+    margin: 2px 0;
+}
+
+.st-desloper-settings .sd_examples_cards {
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.st-desloper-settings .sd_examples_cards > li {
+    padding: 5px 9px;
+    border-left: 2px solid var(--sd-warn);
+    border-radius: 0 6px 6px 0;
+    background: var(--sd-well);
+}
+
+.st-desloper-settings .sd_detail_line {
+    font-size: 0.86em;
+    opacity: 0.85;
+    margin-bottom: 2px;
+}
+
+.st-desloper-settings .sd_jump {
+    cursor: pointer;
+    font-weight: 700;
+    color: var(--sd-accent);
+    text-decoration: none;
+}
+
+.st-desloper-settings .sd_jump:hover {
+    text-decoration: underline;
+}
+
+/* Reused phrases */
+.st-desloper-settings .sd_motifs {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.st-desloper-settings .sd_motif {
+    padding: 6px 2px;
+    border-top: 1px solid var(--sd-line-soft);
+}
+
+.st-desloper-settings .sd_motif:first-child {
+    border-top: 0;
+}
+
+.st-desloper-settings .sd_motif_row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 12px;
+    font-size: 0.9em;
+}
+
+.st-desloper-settings .sd_motif_phrase {
+    font-weight: 600;
+    flex: 1 1 14em;
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_motif_stats {
+    font-size: 0.88em;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_motif_links {
+    font-size: 0.88em;
+}
+
+.st-desloper-settings .sd_motif_done {
+    font-size: 0.8em;
+    opacity: 0.6;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_motif_form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 8px 0 4px;
+    padding: 10px 12px;
+    border-radius: var(--sd-radius);
+    border: 1px solid color-mix(in srgb, var(--sd-accent) 40%, var(--sd-line));
+    background: var(--sd-well);
+}
+
+/* Folds at the bottom of the stats: stock-phrase list, other chats */
+.st-desloper-settings .sd_fold > summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    padding: 9px 12px;
+    cursor: pointer;
+}
+
+.st-desloper-settings .sd_fold > summary .sd_hint {
+    display: inline;
+}
+
+.st-desloper-settings .sd_fold[open] > summary {
+    border-bottom: 1px solid var(--sd-line-soft);
+}
+
+.st-desloper-settings .sd_fold > :not(summary) {
+    margin: 8px 12px;
+}
+
+.st-desloper-settings .sd_fold > :last-child:not(summary) {
+    margin-bottom: 12px;
+}
+
+.st-desloper-settings .sd_stats_foot {
+    text-align: center;
+    padding: 2px 0;
+}
+
+@container (max-width: 560px) {
+    .st-desloper-settings .sd_hero {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .st-desloper-settings .sd_ring {
+        align-self: center;
+    }
+
+    .st-desloper-settings .sd_metric_base,
+    .st-desloper-settings .sd_metric_spark {
+        display: none;
+    }
+
+    .st-desloper-settings .sd_toolbar_end {
+        margin-left: 0;
+    }
+
+    .st-desloper-settings .sd_stats_controls .sd_control {
+        flex: 1 1 100%;
+        min-width: 0;
+    }
+
+    .st-desloper-settings .sd_stats_controls .sd_control_label {
+        flex: 0 0 7.5em;
+    }
+
+    .st-desloper-settings .sd_stats_controls .sd_select {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+}
+
+/* ---------- In the chat ---------- */
+
+/* "Show originals" with changes marked (st/display.js decorate): removed in red and struck,
+   added in green. Solid backgrounds with white text, not coloured text: a theme's quote or
+   italic colour can be red or green too (red quotes made removed bits inside dialogue vanish).
+   !important so theme custom CSS on q/em can't recolour the text. */
+.mes_text .sd_del,
+.mes_text .sd_ins {
+    color: #fff !important;
+    border-radius: 3px;
+    padding: 0 2px;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+
+.mes_text .sd_del {
+    background: rgba(190, 35, 35, 0.85);
+    text-decoration: line-through 2px rgba(255, 255, 255, 0.9);
+}
+
+.mes_text .sd_ins {
+    background: rgba(35, 135, 60, 0.85);
+    text-decoration: none;
+}
+
+.mes_text .sd_del + .sd_ins {
+    margin-left: 0.25em;
+}
