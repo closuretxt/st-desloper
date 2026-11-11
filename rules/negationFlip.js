@@ -324,6 +324,28 @@ function insteadOfEdits(text, g) {
     return edits;
 }
 
+// 6. A negated aside: "She keeps her hand on his arm, not pulling away, and smiles." -> "She keeps
+// her hand on his arm and smiles." The clause around it already says it; only these asides, which
+// restate a hold or a look, go ("not moving" can be the point, so it stays).
+const ASIDE_ING = String.raw`(?:pulling\s+(?:away|back)|letting\s+go|looking\s+away|backing\s+(?:away|off)|stepping\s+back|moving\s+away|shying\s+away|breaking\s+eye\s+contact|flinching|hesitating|resisting|protesting|objecting)`;
+const ASIDE_RE = new RegExp(
+    String.raw`(?:,\s+(?:(?:and|but|yet)\s+)?(?:not|never|without)|\s+without)\s+${ASIDE_ING}(?:\s+(?:at\s+all|either|even\s+(?:a\s+little|slightly)|from\s+(?:him|her|them|it|the\s+touch|${"(?:his|her|their)"}\s+(?:touch|hand|grip)))\b)?(?=\s*[,.!?…;"”*)]|\s*$)`,
+    "gu",
+);
+function asideEdits(text) {
+    const edits = [];
+    for (const m of text.matchAll(ASIDE_RE)) {
+        const head = text.slice(0, m.index);
+        const clause = head.slice(Math.max(head.search(/[^.!?…~♡\n;]*$/), 0));
+        if ((clause.match(/[\p{L}\p{N}]+/gu) || []).length < 3) continue;
+        let end = m.index + m[0].length;
+        // ", not pulling away, and lets…" -> " and lets…": the comma that closed it goes too.
+        if (/^,\s+(?:and|then)\b/.test(text.slice(end))) end++;
+        edits.push({ start: m.index, end, text: MARK, kind: "aside" });
+    }
+    return edits;
+}
+
 export default {
     id: "negation-flip",
     name: "Negated actions",
@@ -347,7 +369,7 @@ export default {
     ],
 
     apply(text, ctx) {
-        if (!/n['’]t\b|\bnot\b|\binstead of\b|\brather than\b/i.test(text)) return text;
+        if (!/n['’]t\b|\bnot\b|\bnever\b|\bwithout\b|\binstead of\b|\brather than\b/i.test(text)) return text;
         const g = grammar(ctx.names);
         const opt = {
             ctx,
@@ -355,7 +377,7 @@ export default {
             flips: parseFlips(listOf(ctx.settings?.flips, FLIP_TABLE)),
             deleteVerbs: new Set(listOf(ctx.settings?.deleteVerbs, DELETE_VERBS).map(v => String(v).trim().toLowerCase())),
         };
-        const edits = insteadOfEdits(text, g);
+        const edits = [...insteadOfEdits(text, g), ...asideEdits(text)];
         g.candidate.lastIndex = 0;
         let m;
         while ((m = g.candidate.exec(text))) {
