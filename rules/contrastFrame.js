@@ -9,6 +9,8 @@
 //   3. not P X, but P Y                She looks at him not with anger, but with pity. -> She looks at him with pity.
 //                                      He left not because he was angry, but because he was afraid.
 //                                                                                 -> He left because he was afraid.
+//   4. …, not to X, just Y.            She squeezes his hand, not to pull him, just holding. -> She squeezes his hand.
+//      (X: a purpose, an -ing word, an -ly word or one plain word; Y: up to 4 words; ends the sentence)
 // Off by default (options): "not just / only X, but Y" (it means X AND Y, so dropping X loses
 // something), and dialogue (a character's own voice).
 // Left alone: clefts ("It wasn't the cold that made her shiver"), "It's not that…", questions,
@@ -181,7 +183,30 @@ function framesIn(text, g, includeJust) {
             edits.push({ start: m.index, end: m.index + m[0].length, text: MARK, kind: "inline-just" });
         }
     }
+    // 4. A trailing "…, not to X, just Y." aside: both halves go.
+    TAIL_ASIDE.lastIndex = 0;
+    while ((m = TAIL_ASIDE.exec(text))) {
+        const [whole, x, y] = m;
+        if (!goodTailX(x) || y.trim().split(/\s+/).length > 4) continue;
+        const sentence = text.slice(0, m.index).split(/[.!?…\n]["”’*_)]*\s+/).pop();
+        if (sentence.replace(/[*_"“”]/g, "").trim().split(/\s+/).length < 3) continue;
+        edits.push({ start: m.index, end: m.index + whole.length, text: MARK, kind: "tail-aside" });
+    }
     return edits;
+}
+
+// ", not to start again, just holding." / " — not demanding, just asking." Ends the sentence.
+const TAIL_ASIDE = /(?:,\s*|\s*[—–]\s*)not\s+([^,.;!?"“”\n*—–]{1,45}?),\s+(?:just|only|simply|merely)\s+([^,.;!?"“”\n*—–]{1,35}?)(?=[.!…])/giu;
+
+// X is a purpose ("to start again"), a doing ("demanding"), a manner ("unkindly") or one plain word
+// ("hard"). Not a role or a place ("as a guard", "in the hall"): those carry meaning.
+function goodTailX(x) {
+    const t = x.trim();
+    const words = t.split(/\s+/);
+    if (words.length > 6 || NEGATED.test(t)) return false;
+    if (/^to\s+\p{L}/iu.test(t)) return true;
+    if (startsWithParticiple(t) || /^\p{L}+ly$/iu.test(words[0])) return true;
+    return words.length === 1 && !/^(?:as|in|on|at|for|with|from|by|because|yet|now|here|there|me|him|her|them|you|us|it)$/i.test(t);
 }
 
 function goodInline(x) {
