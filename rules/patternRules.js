@@ -8,10 +8,14 @@
 //
 // pattern: { id, name, find, replace, scope, where, enabled, checks: { lineEnd, otherWords, skipQuestions } }
 //   find:    "/regex/flags" (like ST's Regex extension) or plain text (matched as is, any case,
-//            whole words)
+//            whole words). In plain text, {x} (any name) is a blank: 1 to 4 words, never across
+//            punctuation, so "the way {x} did" catches "the way most people did". The same blank
+//            twice must match the same words.
 //   replace: one text, or several on separate lines (one is picked per match, the same one every
-//            time for the same message). Empty = delete. {{match}}, $&, $1, $<name> work like in
-//            ST's Regex extension.
+//            time for the same message). Empty = delete. A line that is just {{delete}} is a
+//            "delete" option in the pool, so a pattern can reword some matches and remove others;
+//            repeating a line makes it come up more often. {x} puts back a blank's words;
+//            {{match}}, $&, $1, $<name> work like in ST's Regex extension.
 
 import { MARK } from "../core/marks.js";
 import { pick } from "../core/seed.js";
@@ -21,6 +25,31 @@ export const PATTERN_ORDER = 900;
 function escapeRe(s) {
     return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
+
+// {x}, {who}, {thing_2}: a blank in a plain-text find, or its words in a replacement.
+const BLANK_RE = /\{([A-Za-z]\w*)\}/g;
+// One to four words (apostrophes and hyphens inside a word are fine), never across punctuation,
+// so a blank stays inside its own clause.
+const WORD = "[\\p{L}\\p{N}'’\\-]+";
+const BLANK_BODY = `${WORD}(?:\\s+${WORD}){0,3}`;
+
+function plainBody(src) {
+    const seen = new Set();
+    let out = "";
+    let last = 0;
+    for (const m of src.matchAll(BLANK_RE)) {
+        out += escapeRe(src.slice(last, m.index)).replace(/\s+/g, "\\s+");
+        const name = m[1];
+        // A name used twice must match the same words (and JS forbids duplicate group names).
+        out += seen.has(name) ? `\\k<${name}>` : `(?<${name}>${BLANK_BODY})`;
+        seen.add(name);
+        last = m.index + m[0].length;
+    }
+    return out + escapeRe(src.slice(last)).replace(/\s+/g, "\\s+");
+}
+
+// A pool line that means "delete this match".
+const DELETE_LINE = /^\s*\{\{delete\}\}\s*$/i;
 
 const compiled = new Map();
 // -> { re } or { error }. Always global; a sticky flag would make matches depend on position.
@@ -37,10 +66,15 @@ export function compileFind(find) {
         } else if (src.startsWith("/")) {
             // Most likely a regex still being typed; matching it as plain text would surprise.
             result = { error: "starts with / but doesn't end with /flags (like /text/i)" };
+        } else if (!/[\p{L}\p{N}]/u.test(src.replace(BLANK_RE, ""))) {
+            // Blanks alone would match any words anywhere.
+            result = { error: "needs at least one real word next to the {blank}" };
         } else {
-            const pre = /^[\p{L}\p{N}_]/u.test(src) ? "(?<![\\p{L}\\p{N}_])" : "";
-            const post = /[\p{L}\p{N}_]$/u.test(src) ? "(?![\\p{L}\\p{N}_])" : "";
-            result = { re: new RegExp(pre + escapeRe(src).replace(/\s+/g, "\\s+") + post, "giu") };
+            // Blanks count as words for the whole-word edges ("{x} did" still needs a word start).
+            const edges = src.replace(BLANK_RE, "w");
+            const pre = /^[\p{L}\p{N}_]/u.test(edges) ? "(?<![\\p{L}\\p{N}_])" : "";
+            const post = /[\p{L}\p{N}_]$/u.test(edges) ? "(?![\\p{L}\\p{N}_])" : "";
+            result = { re: new RegExp(pre + plainBody(src) + post, "giu") };
         }
     } catch (e) {
         result = { error: e.message };
@@ -50,20 +84,27 @@ export function compileFind(find) {
     return result;
 }
 
-// {{match}} / $& -> the match, $1 -> group 1, $<name> -> named group, $$ -> "$".
+// {{match}} / $& -> the match, $1 -> group 1, $<name> / {name} -> named group, $$ -> "$".
+// A {name} with no such group stays as typed (it may be real text in braces).
 export function expandReplacement(template, m) {
-    return String(template).replace(/\{\{match\}\}|\$\$|\$&|\$<([^>]+)>|\$(\d{1,2})/gi, (tok, name, num) => {
+    return String(template).replace(/\{\{match\}\}|\$\$|\$&|\$<([^>]+)>|\$(\d{1,2})|\{([A-Za-z]\w*)\}/gi, (tok, name, num, blank) => {
         if (tok === "$$") return "$";
         if (name !== undefined) return m.groups?.[name] ?? "";
         if (num !== undefined) return m[Number(num)] ?? "";
+        if (blank !== undefined) return m.groups && blank in m.groups ? (m.groups[blank] ?? "") : tok;
         return m[0];
     });
 }
 
-function poolOf(replace) {
+// Replace lines -> the pool to pick from. A {{delete}} line becomes "" (a delete option);
+// blank lines are ignored, and no lines at all means delete every time.
+export function poolOf(replace) {
     const lines = String(replace ?? "").split("\n");
-    const pool = lines.map(l => l.replace(/\r$/, "")).filter(l => l.trim());
-    return pool.length ? pool : [""];
+    const pool = lines
+        .map(l => l.replace(/\r$/, ""))
+        .filter(l => l.trim())
+        .map(l => (DELETE_LINE.test(l) ? null : l));
+    return pool.length ? pool : [null];
 }
 
 function lineAround(text, start, end) {
@@ -115,7 +156,7 @@ export function patternRule(p, index = 0, { prefix = "pattern", base = PATTERN_O
                 if (!m[0]) continue;
                 if (!passesChecks(text, m, p.checks)) continue;
                 const template = pool.length > 1 ? pick(ctx.rng, pool) : pool[0];
-                const repl = expandReplacement(template, m);
+                const repl = template === null ? "" : expandReplacement(template, m);
                 out += text.slice(last, m.index) + MARK + repl + MARK;
                 last = m.index + m[0].length;
                 hits.push({ before: m[0], after: repl, pattern: p.id });

@@ -113,7 +113,7 @@ function patternCard(p) {
         });
     const $error = $('<div class="sd_error">');
     const showError = () => $error.text(findError(p.find)).toggle(!!findError(p.find));
-    const $find = $('<input type="text" class="text_pole sd_mono sd_pattern_find" placeholder="plain text, or /regex/flags">')
+    const $find = $('<input type="text" class="text_pole sd_mono sd_pattern_find" placeholder="plain text ({x} = any 1-4 words), or /regex/flags">')
         .val(p.find || "")
         .on("input", () => {
             p.find = String($find.val());
@@ -121,7 +121,7 @@ function patternCard(p) {
             refreshTitle();
             save();
         });
-    const $replace = $('<textarea class="text_pole sd_textarea sd_mono" rows="2" placeholder="empty = delete; several lines = one picked per message; {{match}}, $1 work">')
+    const $replace = $('<textarea class="text_pole sd_textarea sd_mono" rows="2" placeholder="empty = delete; several lines = one picked per match; a {{delete}} line = sometimes delete; {x}, {{match}}, $1 work">')
         .val(p.replace || "")
         .on("input", () => {
             p.replace = String($replace.val());
