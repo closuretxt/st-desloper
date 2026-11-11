@@ -7,7 +7,8 @@
 // written is shown raw, since a rule could misread half a sentence. Finished lines hit the cache
 // on every later tick, so a tick costs one extra render, not a pipeline run. Rules that look at
 // the reply as a whole (the end of the reply, budgets) can judge differently once more text has
-// come in, so the preview may shift slightly; the full clean on "message received" settles it.
+// come in; to stop lines already shown from changing (flicker), settled lines are kept as shown
+// (core/live.js liveState). ST's last render shows the full clean, which settles everything.
 //
 // With ST's "stream fade-in" on, the clean version goes through ST's own fade-in function (word
 // spans, morphed into place), so words already shown keep their place and new ones still fade in.
@@ -16,7 +17,7 @@ import { getContext } from "../../../../extensions.js";
 import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, budgetWindow, speakerOf } from "./cleaner.js";
 import { getSettings } from "../settings/settingsManager.js";
 import { logDebug } from "../core/debug.js";
-import { liveText } from "../core/live.js";
+import { liveText, liveState } from "../core/live.js";
 
 let observer = null;
 let watched = null; // { el, id, names, lastUser, history }
@@ -55,6 +56,13 @@ function fadeInOn() {
     return !!getContext().powerUserSettings?.stream_fade_in;
 }
 
+// ST marks the stream finished before its last render (onFinishStreaming); a stopped stream gets
+// no last render and goes straight to the full clean.
+function finalTick(ctx) {
+    const sp = ctx.streamingProcessor;
+    return !!sp && sp.isFinished === true && !sp.isStopped;
+}
+
 function onMutation() {
     try {
         if (!watched || !enabled()) return;
@@ -63,7 +71,16 @@ function onMutation() {
         if (!isAiMessage(m) || typeof m.mes !== "string") return;
         // The speaker is read each time: a group reply's `original_avatar` is set as it's made.
         const speaker = speakerOf(m, ctx);
-        const shown = liveText(m.mes, done => cleanText(done, "display", watched.names, watched.lastUser, watched.history, speaker));
+        const clean = text => cleanText(text, "display", watched.names, watched.lastUser, watched.history, speaker);
+        let shown;
+        if (finalTick(ctx)) {
+            // ST's last render of the whole reply: show the full clean now, the same call (and
+            // cache entry) st/display.js makes next, so the hand-off changes nothing on screen.
+            const out = clean(m.mes);
+            shown = out.changed && out.text.trim() ? out.text : m.mes;
+        } else {
+            shown = liveText(m.mes, clean, watched.live);
+        }
         if (shown === m.mes) return;
         const html = ctx.messageFormatting(shown, m.name, m.is_system, m.is_user, watched.id, {}, false);
         if (fadeInOn() && fadeIn) fadeIn(watched.el, html);
@@ -89,7 +106,7 @@ export function watch() {
     const id = Number(mes.getAttribute("mesid"));
     const chat = getContext().chat || [];
     if (!isAiMessage(chat[id])) return;
-    watched = { el, id, names: chatNames(), lastUser: lastUserBefore(chat, id), history: historyBefore(chat, id, budgetWindow()) };
+    watched = { el, id, names: chatNames(), lastUser: lastUserBefore(chat, id), history: historyBefore(chat, id, budgetWindow()), live: liveState() };
     if (fadeIn === undefined) loadFadeIn();
     observer = new MutationObserver(onMutation);
     // subtree + characterData: fade-in morphs the text inside the paragraphs, not just them.

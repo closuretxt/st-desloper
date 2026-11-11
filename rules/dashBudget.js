@@ -13,7 +13,9 @@
 // Never touched (they still count toward the budget): a dash or ellipsis that ends a line
 // (cut off), starts one, a stammer ("I—I"), a pair with commas inside, a dash after "knew /
 // thought / said…" or before a name (unsure what follows), "...?", number ranges (1990–2000),
-// "---" lines. Dialogue only when the option is on, and there a trailing "..." always stays.
+// "---" lines, an ellipsis mid-phrase ("such a... *substantial*", "tastes like... fire").
+// Dialogue only when its option is on (dashes and ellipses each have one), and there a trailing
+// "..." always stays.
 
 import { MARK } from "../core/marks.js";
 import { earlier } from "../core/speech.js";
@@ -35,6 +37,15 @@ const REPORTING = new Set(
         "know knew knows thought think thinks realized realize realizes realised felt feel feels saw see sees " +
         "wondered wonder wonders hoped hope hopes feared fear fears said say says whispered whispers meant mean means " +
         "understood understand understands remembered remember remembers decided decide decides prayed wished wish"
+    ).split(" "),
+);
+
+// Words a phrase can't stop on: an ellipsis after them is a pause mid-phrase.
+const MID_PHRASE = new Set(
+    (
+        "a an the such so very quite really too my your his her its our their this that these those " +
+        "of to in on at by for with from into like as than about and or but nor if is was are were be " +
+        "am been being has have had do does did can could will would should shall may might must just"
     ).split(" "),
 );
 
@@ -129,9 +140,14 @@ export function ellipsisUses(text, { trailingKeep = false } = {}) {
             if (!trailingKeep) use.text = `.${m[0].match(/[ \t]*$/)[0]}`;
             continue;
         }
+        // A pause inside a phrase ("such a... substantial", "tastes like... fire"): any mark
+        // there breaks the sentence, so it stays.
+        if (MID_PHRASE.has(lastWord(before))) continue;
         const w = firstWord(after).toLowerCase();
-        if (/^\p{Ll}/u.test(after)) use.text = JOIN_PLAIN.has(w) ? " " : ", ";
-        else if (/^[\p{Lu}"“*_]/u.test(after)) use.text = ". ";
+        // Italic marks don't start a sentence: "a... *substantial*" goes by the word inside.
+        const word = after.replace(/^[*_]+/, "");
+        if (/^\p{Ll}/u.test(word)) use.text = JOIN_PLAIN.has(w) ? " " : ", ";
+        else if (/^[\p{Lu}"“]/u.test(word)) use.text = ". ";
     }
     return uses;
 }
@@ -160,18 +176,24 @@ export default {
     description: "Past the budget, dashes and ellipses become plain punctuation where what follows makes it clear: He nodded—she was right. → He nodded. She was right.",
     scope: "all",
     order: 300,
-    defaults: { enabled: true, dashesPer100: 1, ellipsesPer100: 1, inDialogue: false },
+    defaults: { enabled: true, dashesPer100: 1, ellipsesPer100: 1, inDialogue: false, ellipsesInDialogue: false },
     options: [
         { key: "dashesPer100", type: "number", label: "Dashes allowed per 100 words (at least one per reply; 0 = none)", min: 0, max: 20 },
         { key: "ellipsesPer100", type: "number", label: "Ellipses allowed per 100 words (at least one per reply; 0 = none)", min: 0, max: 20 },
-        { key: "inDialogue", type: "checkbox", label: "Also inside dialogue" },
+        { key: "inDialogue", type: "checkbox", label: "Dashes inside dialogue too" },
+        { key: "ellipsesInDialogue", type: "checkbox", label: "Ellipses inside dialogue too (pauses in speech; usually best left)" },
     ],
 
     apply(text, ctx) {
         const s = ctx.settings || {};
         const seg = ctx.segment;
         if (!seg || !Array.isArray(seg.segments)) return text;
-        if (seg.type === "dialogue" && !s.inDialogue) return text;
+        // Dashes and ellipses each have their own dialogue switch: a dash in speech is often just
+        // the model's habit, an ellipsis is how the line is said.
+        const speech = seg.type === "dialogue";
+        const doDash = !speech || !!s.inDialogue;
+        const doDots = !speech || !!s.ellipsesInDialogue;
+        if (!doDash && !doDots) return text;
         if (!/[—―⸺⸻﹘–-]|\.\.\.|…|\. \. \./.test(text)) return text;
 
         // The budget is for the whole reply; the uses in earlier segments come first.
@@ -179,14 +201,15 @@ export default {
         const maxDash = allowed(s.dashesPer100, words);
         const maxDots = allowed(s.ellipsesPer100, words);
         // Cached per segment for this run (core/speech.js earlier), so many segments stay cheap.
-        const scoped = x => inScope(x, s.inDialogue);
-        let dashSeen = earlier(ctx, t => dashUses(t), scoped, `dash\u0001${!!s.inDialogue}`).length;
-        let dotsSeen = earlier(ctx, (t, x) => ellipsisUses(t, { trailingKeep: x.type === "dialogue" }), scoped, `dots\u0001${!!s.inDialogue}`).length;
+        let dashSeen = earlier(ctx, t => dashUses(t), x => inScope(x, s.inDialogue), `dash\u0001${!!s.inDialogue}`).length;
+        let dotsSeen = earlier(ctx, (t, x) => ellipsisUses(t, { trailingKeep: x.type === "dialogue" }), x => inScope(x, s.ellipsesInDialogue), `dots\u0001${!!s.ellipsesInDialogue}`).length;
 
         const edits = [];
-        for (const u of dashUses(text)) if (dashSeen++ >= maxDash && u.text !== null) edits.push({ ...u, kind: "dash", label: "dash" });
-        for (const u of ellipsisUses(text, { trailingKeep: seg.type === "dialogue" })) {
-            if (dotsSeen++ >= maxDots && u.text !== null) edits.push({ ...u, kind: "ellipsis", label: "ellipsis" });
+        if (doDash) for (const u of dashUses(text)) if (dashSeen++ >= maxDash && u.text !== null) edits.push({ ...u, kind: "dash", label: "dash" });
+        if (doDots) {
+            for (const u of ellipsisUses(text, { trailingKeep: speech })) {
+                if (dotsSeen++ >= maxDots && u.text !== null) edits.push({ ...u, kind: "ellipsis", label: "ellipsis" });
+            }
         }
         if (!edits.length) return text;
 

@@ -79,6 +79,7 @@ export const ENTRIES = [
     { id: "waiting", label: 'Waiting ("Don\'t keep me waiting")', example: '"Come on. Hurry up, we\'ll be late." → "Come on."  Also "Tick tock.", "I don\'t have all day."' },
     { id: "handover", label: 'Handovers ("Your move.")', example: '"Here\'s the map. Your move." → "Here\'s the map."  Also "What do you say?", "Well?"' },
     { id: "dare", label: 'Dares ("Show me what you\'ve got.")', example: '"Not bad. Show me what you\'ve got." → "Not bad."  Also "Prove it.", "Impress me.", "Do your worst."' },
+    { id: "come-on", label: '"Come on" + an order ("Come on. Show me!")', example: '…her eyes wide. "Come on, rookie. Send me flying!" → …her eyes wide.  Only at the reply\'s end; goes even as her only line when there\'s narration.' },
     { id: "dare-mid", label: "Dares mid-reply", example: '"Okay, I\'m ready. Give me your best shot." She leans in. → "Okay, I\'m ready." She leans in.  Only when the quote has another line.' },
     { id: "rush", label: 'Made-up rush ("…before it sells out!")', example: '"Lift me up before the claw warms up!" → "Lift me up!"  Also "…before someone else grabs it", "…before the line gets long".' },
     { id: "hook", label: 'Narrator\'s hook ("What do you do?")', example: "…the door creaks open. What do you do? → …the door creaks open.  Only as the reply's last sentence." },
@@ -110,6 +111,18 @@ const COLD_TAIL = /,?\s+(?:before (?:it|they|the \p{L}+|your \p{L}+)\s+(?:gets?|
 // the stall next door sells out!". Only things nobody is racing in the scene (selling out,
 // warming up, filling up, someone else taking it); "before the gate closes" can be the plot.
 const RUSH_TAIL = /,?\s+before\s+(?:the|that|this|those|these|it|they|someone|somebody|anyone|anybody|everyone|everybody|all|my|your|our|his|her|their)(?:\s+[\p{L}'’-]+){0,3}?\s+(?:(?:sells?|sold|runs?|ran)\s+out|warms?\s+up|cools?\s+(?:down|off)|fills?\s+up|gets?\s+(?:too\s+|any\s+)?(?:crowded|busy|packed|full|long|longer)|(?:takes?|grabs?|snatches?|steals?|gets?|nabs?)\s+(?:it|them|that|those|the\s+\p{L}+|our\s+\p{L}+|my\s+\p{L}+|your\s+\p{L}+)(?:\s+first)?|changes?\s+(?:its|his|her|their|my|your)\s+mind)(?=[*_]{0,3}[.!?…~]*[*_]{0,3}\s*$)/iu;
+
+// "Come on, kid." as its own sentence, or "Come on, kid, …" in front of the order.
+const COME_ALONE = /^(?:(?:oh|hey|well|so)[,!]?\s+)?(?:come on|c'mon|go on)(?:[,!]?\s+[a-z'-]+)?[.!…~]*$/;
+const COME_LEAD = /^(?:(?:oh|hey|well|so)[,!]?\s+)?(?:come on|c'mon|go on)(?:[,!]\s+[a-z'-]+)?[,!]\s+/;
+// An order: no subject in front, short, not a question ("Send me flying!", "Let's go!",
+// "Don't be shy!"). "You can do it!" or "It's fine." aren't orders.
+const NOT_COMMAND = /^(?:i|i'm|i'll|i've|i'd|you|you're|you'll|you've|you'd|he|he's|she|she's|we|we're|we'll|they|they're|it|it's|this|that|that's|these|those|there|there's|here|here's|the|a|an|my|your|his|her|our|their|its|what|who|why|how|when|where|is|are|was|were|do|does|did|can|could|would|will|should|shall|maybe|no|yes|yeah|not|nothing|everyone|someone|okay|ok|fine|well|now|and|but|so|if|because|or|oh|ah|hm+|mm+|heh|ha)\b/;
+function isCommand(l) {
+    const t = l.replace(/^please,?\s+/, "").trim();
+    if (!/^[a-z]/.test(t) || /\?/.test(t) || NOT_COMMAND.test(t)) return false;
+    return t.split(/\s+/).length <= 12;
+}
 
 // A head too bare to keep alone ("Eat", "Come on, drink"): the whole line is the closer then.
 const BARE = /^[\s*_"]*(?:(?:now|come on|go on|so|okay|ok|here)[,!]?\s+)*(?:eat|drink|hurry|eat up|drink up|go|quick(?:ly)?|finish(?: up)?)[\s*_,]*$/i;
@@ -175,6 +188,32 @@ export default {
                     edits.push(sentenceEdit(s, { kind: "hurry", part: k, label: ENTRIES.find(e => e.id === k).label }));
                     gone.add(s);
                 }
+            }
+        }
+
+        // "Come on, kid. Show me the way!" at the reply's end: the nudge and the order it pushes
+        // count as one closer. Unlike the others it goes even as her only line, when the reply
+        // has narration to end on (the user, 2026-11-11: "it's literally come on").
+        if (speech && atEnd && !gone.size && !off.has("come-on")) {
+            const label = ENTRIES.find(e => e.id === "come-on").label;
+            for (let c = sents.length - 1; c >= Math.max(0, sents.length - 3); c--) {
+                const l = looseOf(sents[c].text);
+                let hit = false;
+                if (COME_ALONE.test(l)) {
+                    const rest = sents.slice(c + 1);
+                    hit = rest.length >= 1 && rest.length <= 2 && rest.every(s => isCommand(looseOf(s.text)));
+                } else if (c === sents.length - 1) {
+                    const lead = COME_LEAD.exec(l);
+                    hit = !!lead && isCommand(l.slice(lead[0].length));
+                }
+                if (!hit) continue;
+                if (c > 0 || earlierSpeech(ctx) || othersHaveText(ctx)) {
+                    for (const s of sents.slice(c)) {
+                        edits.push(sentenceEdit(s, { kind: "hurry", part: "come-on", label }));
+                        gone.add(s);
+                    }
+                }
+                break;
             }
         }
 
