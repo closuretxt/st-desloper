@@ -15,21 +15,24 @@ import { MARK } from "../core/marks.js";
 const GUARD = "meet|leave|back|home|done|finish|finished|ready|wait|open|closed|free|busy|due";
 const NUMBER = "one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve";
 // Times that read right after before / until / till / by.
-const WHEN = [
+const WHEN_WORDS = [
     "lunch|dinner|supper|breakfast|noon|midday|midnight|class|practice|bedtime|curfew|lights out",
     "tonight|tomorrow|morning|afternoon|evening",
     "sunset|sundown|sunrise|dawn|dusk|nightfall|daybreak",
     "monday|tuesday|wednesday|thursday|friday|saturday|sunday|the weekend|the end of the (?:day|week|month)",
-    `(?:${NUMBER})(?: o.clock| thirty)?`,
     // Digits only with a clock mark: "before 10 people" is not a time.
     "(?:1[0-2]|[1-9])(?::[0-5]\\d(?: ?[ap]\\.?m\\.?)?| ?[ap]\\.?m\\.?| o.clock)",
 ].join("|");
+const WHEN = `${WHEN_WORDS}|(?:${NUMBER})(?: o.clock| thirty)?`;
+// After "by", a number word counts only with o'clock / thirty: a bare one is a count, not a time
+// ("one by one", "two by two", "won by three", "missed it by one").
+const WHEN_BY = `${WHEN_WORDS}|(?:${NUMBER})(?: o.clock| thirty)`;
 // The bell only after before / until: "woken by the bell" is who woke you, not when.
 const BELL = "the (?:first |final |last )?bell(?: (?:even |had |has )?(?:rang|rings|rung))?";
 const AFTER = "(?: in the [a-z]+| tonight| tomorrow| today| this (?:morning|afternoon|evening|week))?";
 
 const TAIL_RE = new RegExp(
-    `(?<!\\b(?:${GUARD}))(?<!\\b(?:${GUARD}),),? (?:(?:before|until|till) (?:${BELL}|${WHEN})|by (?:${WHEN}))${AFTER}(?=[.!?~♡"”…]|,?$)`,
+    `(?<!\\b(?:${GUARD}))(?<!\\b(?:${GUARD}),),? (?:(?:before|until|till) (?:${BELL}|${WHEN})|by (?:${WHEN_BY}))${AFTER}(?=[.!?~♡"”…]|,?$)`,
     "gi",
 );
 
