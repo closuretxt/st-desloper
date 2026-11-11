@@ -8,7 +8,8 @@
 //   ...the door creaks open. What do you do?              -> ...the door creaks open.
 // Parts, each with its own switch: food ("…before it gets cold"), waiting ("Don't keep me
 // waiting", "Tick tock", "Come on."), handovers ("Your move.", "What do you say?"), dares ("Show me
-// what you've got.", "Prove it.") and the narrator's hook
+// what you've got.", "Prove it."; mid-reply too with "dare-mid", when the quote keeps another
+// line) and the narrator's hook
 // ("What do you do?"), plus the made-up rush tail ("Lift me up before the claw warms up!" ->
 // "Lift me up!"), cut from speech like the cold-food tail.
 //
@@ -53,10 +54,11 @@ const WAITING = [
     // A bare "Come on, kid." nudge: one word may follow as who it's said to.
     String.raw`(?:come on|c'mon)(?:,? [a-z]+)?`,
 ];
-// The dare a reply ends on: "Show me what you've got." Only at the end, like the others.
+// The dare: "Show me what you've got." At the reply's end ("dare"), or anywhere in speech with
+// its own switch ("dare-mid"). One word may follow as who it's said to ("…best shot, rookie.").
 const DARE = [
-    String.raw`${NUDGE}(?:show me|let's see|let me see)(?:,? then,?)? what you(?:'ve| have)?(?: really)? got`,
-    String.raw`${NUDGE}(?:prove it|impress me|dazzle me|bring it(?: on)?|do your worst|give it your best shot|give me your best shot|let's see you try)`,
+    String.raw`${NUDGE}(?:show me|let's see|let me see)(?:,? then,?)? what you(?:'ve| have)?(?: really)? got(?:,? [a-z]+)?`,
+    String.raw`${NUDGE}(?:prove it|impress me|dazzle me|bring it(?: on)?|do your worst|give it your best shot|give me your best shot|hit me with your best shot|let's see you try)(?:,? [a-z]+)?`,
 ];
 const HANDOVER = [
     String.raw`(?:so,? |well,? |now,? )?what are you waiting for`,
@@ -77,6 +79,7 @@ export const ENTRIES = [
     { id: "waiting", label: 'Waiting ("Don\'t keep me waiting")', example: '"Come on. Hurry up, we\'ll be late." → "Come on."  Also "Tick tock.", "I don\'t have all day."' },
     { id: "handover", label: 'Handovers ("Your move.")', example: '"Here\'s the map. Your move." → "Here\'s the map."  Also "What do you say?", "Well?"' },
     { id: "dare", label: 'Dares ("Show me what you\'ve got.")', example: '"Not bad. Show me what you\'ve got." → "Not bad."  Also "Prove it.", "Impress me.", "Do your worst."' },
+    { id: "dare-mid", label: "Dares mid-reply", example: '"Okay, I\'m ready. Give me your best shot." She leans in. → "Okay, I\'m ready." She leans in.  Only when the quote has another line.' },
     { id: "rush", label: 'Made-up rush ("…before it sells out!")', example: '"Lift me up before the claw warms up!" → "Lift me up!"  Also "…before someone else grabs it", "…before the line gets long".' },
     { id: "hook", label: 'Narrator\'s hook ("What do you do?")', example: "…the door creaks open. What do you do? → …the door creaks open.  Only as the reply's last sentence." },
 ];
@@ -170,6 +173,19 @@ export default {
             if (run.length && keep) {
                 for (const { s, k } of run) {
                     edits.push(sentenceEdit(s, { kind: "hurry", part: k, label: ENTRIES.find(e => e.id === k).label }));
+                    gone.add(s);
+                }
+            }
+        }
+
+        // Dares anywhere in speech, when the quote keeps a line that isn't one.
+        if (speech && !off.has("dare-mid")) {
+            const isDare = s => m.dare.some(r => r.test(looseOf(s.text)));
+            const dares = sents.filter(s => !gone.has(s) && isDare(s));
+            if (dares.length && sents.some(s => !gone.has(s) && !isDare(s))) {
+                const label = ENTRIES.find(e => e.id === "dare-mid").label;
+                for (const s of dares) {
+                    edits.push(sentenceEdit(s, { kind: "hurry", part: "dare-mid", label }));
                     gone.add(s);
                 }
             }

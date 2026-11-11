@@ -20,6 +20,7 @@ import bossGirl from "./bossGirl.js";
 import stutterBudget from "./stutterBudget.js";
 import gestureBudget from "./gestureBudget.js";
 import wornImages from "./wornImages.js";
+import stares from "./stares.js";
 import loneLines from "./loneLines.js";
 import adverbFragments from "./adverbFragments.js";
 import flatQuestions from "./flatQuestions.js";
@@ -29,19 +30,21 @@ import chatbotResidue from "./chatbotResidue.js";
 import textFixes from "./textFixes.js";
 import contractions from "./contractions.js";
 import { patternRules } from "./patternRules.js";
+import { characterPatternRules } from "../core/characters.js";
 
 // This order is the order of the drawer's chips and the fixes popup (not the run order: that's
 // each rule's `order`). By priority: the fixes that catch the most slop first, then the
 // character filters, the off-by-default budgets, and the mechanical clean-ups last.
 export const BUILTIN_RULES = [
     negationFlip, contrastFrame, phraseLexicon, stockLines, stagedQuestions, threeInARow, echoTrim, innerRepeat,
-    wornImages, hurryClosers, stockPunchlines, tagQuestions, tsk, timeTails, adverbFragments, dashBudget,
+    wornImages, stares, hurryClosers, stockPunchlines, tagQuestions, tsk, timeTails, adverbFragments, dashBudget,
     tsundere, bossGirl,
     stutterBudget, gestureBudget, loneLines, flippedEndings, flatQuestions,
     textFixes, contractions, leakedText, chatbotResidue,
 ];
 
 // Built-ins plus the user's own patterns, for one run of the pipeline.
-export function allRules(settings) {
-    return [...BUILTIN_RULES, ...patternRules(settings?.patterns)];
+// character: that character's entry (core/characters.js characterEntry), for its own patterns.
+export function allRules(settings, character = null) {
+    return [...BUILTIN_RULES, ...patternRules(settings?.patterns), ...characterPatternRules(character)];
 }

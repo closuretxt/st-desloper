@@ -13,7 +13,7 @@
 // spans, morphed into place), so words already shown keep their place and new ones still fade in.
 
 import { getContext } from "../../../../extensions.js";
-import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, budgetWindow } from "./cleaner.js";
+import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, budgetWindow, speakerOf } from "./cleaner.js";
 import { getSettings } from "../settings/settingsManager.js";
 import { logDebug } from "../core/debug.js";
 import { liveText } from "../core/live.js";
@@ -61,7 +61,9 @@ function onMutation() {
         const ctx = getContext();
         const m = ctx.chat?.[watched.id];
         if (!isAiMessage(m) || typeof m.mes !== "string") return;
-        const shown = liveText(m.mes, done => cleanText(done, "display", watched.names, watched.lastUser, watched.history));
+        // The speaker is read each time: a group reply's `original_avatar` is set as it's made.
+        const speaker = speakerOf(m, ctx);
+        const shown = liveText(m.mes, done => cleanText(done, "display", watched.names, watched.lastUser, watched.history, speaker));
         if (shown === m.mes) return;
         const html = ctx.messageFormatting(shown, m.name, m.is_system, m.is_user, watched.id, {}, false);
         if (fadeInOn() && fadeIn) fadeIn(watched.el, html);

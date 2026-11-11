@@ -1,12 +1,14 @@
 // The fixes popup: the built-in fixes with their options, Your patterns, and the tester. On a
 // wide screen the tester sits in a column beside the list, so changing an option shows its effect
-// right away; on a narrow one it's a third tab.
+// right away; on a narrow one it's a third tab. The picker in the title edits one character's
+// overrides and patterns instead of the global ones (core/characters.js).
 
 import { getContext } from "../../../../extensions.js";
 import { BUILTIN_RULES } from "../rules/index.js";
 import { renderRules, setAllCardsOpen, isRuleOn } from "./settingsPanel.js";
-import { initPatternsEditor, setPatternsScope } from "./patternsEditor.js";
-import { initTester } from "./tester.js";
+import { initPatternsEditor, setPatternsScope, renderPatterns } from "./patternsEditor.js";
+import { initTester, runTester } from "./tester.js";
+import { characterChoices, getTarget, setTarget, targetKey } from "./characterTarget.js";
 import { LOG_PREFIX } from "../core/constants.js";
 import { getSettings, settingsChanged } from "../settings/settingsManager.js";
 import { budgetWindow } from "../st/cleaner.js";
@@ -17,7 +19,11 @@ const TEMPLATE = `
 <div class="sd_popup sd_fx st-desloper-settings">
     <div class="sd_popup_title">
         <span class="sd_popup_name">🧽 Desloper fixes</span>
-        <span class="sd_note">Changes save as you go and apply to every chat.</span>
+        <label class="sd_char_pick_wrap" title="Edit the fixes for every character, or for one character's replies only">
+            <i class="fa-solid fa-user"></i>
+            <select class="text_pole sd_select sd_char_pick"></select>
+        </label>
+        <span class="sd_note sd_scope_note"></span>
     </div>
     <div class="sd_tabs" role="tablist">
         <button type="button" class="sd_tab" data-tab="fixes"><i class="fa-solid fa-wand-magic-sparkles"></i><span>Fixes</span><span class="sd_tab_count sd_tab_count_fixes"></span></button>
@@ -55,6 +61,7 @@ const TEMPLATE = `
                     <input class="sd_pattern_file" type="file" accept=".json,application/json" hidden />
                 </div>
                 <div class="sd_card_list sd_pattern_list"></div>
+                <div class="sd_pattern_globals" hidden></div>
             </section>
         </div>
         <aside class="sd_pane sd_fx_tester" data-pane="tester">
@@ -91,19 +98,54 @@ function showTab($root, tab) {
     });
 }
 
+// The character picker: everyone first (the default), then the open chat's characters only.
+// "✱" marks a character that has its own settings. No chat open: just the global settings.
+function fillPicker($sel) {
+    const list = characterChoices();
+    $sel.empty().append($("<option>").val("").text("All characters"));
+    for (const c of list) $sel.append($("<option>").val(c.key).text(c.custom ? `${c.name} ✱` : c.name));
+    $sel.val(targetKey() || "").prop("disabled", !list.length);
+    $sel.closest(".sd_char_pick_wrap").attr("title", list.length ? "Edit the fixes for every character, or for one character in this chat" : "Open a chat to give its characters their own fixes");
+}
+
+function showScope($root) {
+    const t = getTarget();
+    $root.toggleClass("sd_char_mode", !!t);
+    $root
+        .find(".sd_scope_note")
+        .text(t ? `Only ${t.name}'s replies. Untouched settings follow the global ones; ↺ on a fix puts it back.` : "Changes save as you go and apply to every chat.");
+}
+
 // tab: "fixes" | "patterns" | "tester".
 export async function openFixes(tab = "fixes") {
     if (openPopup) return;
     const ctx = getContext();
     const $root = $(TEMPLATE);
     const $rules = $root.find(".sd_rule_list");
+    // Every opening starts on the global settings.
+    setTarget(null);
+    const $pick = $root.find(".sd_char_pick");
     try {
+        fillPicker($pick);
+        showScope($root);
         renderRules($rules);
         initPatternsEditor($root);
         initTester($root);
     } catch (e) {
         console.error(`${LOG_PREFIX} fixes popup failed:`, e);
     }
+    $pick.on("change", () => {
+        try {
+            setTarget(String($pick.val() || ""));
+            showScope($root);
+            renderRules($rules);
+            renderPatterns();
+            runTester();
+            $root.find(".sd_tab_count_fixes").text(fixesCount());
+        } catch (e) {
+            console.error(`${LOG_PREFIX} character picker failed:`, e);
+        }
+    });
     $root.find(".sd_tab_count_fixes").text(fixesCount());
     $root.on("change", ".sd_rule .sd_card_head .sd_switch", () => $root.find(".sd_tab_count_fixes").text(fixesCount()));
     $root.on("click", ".sd_tab", function () {
@@ -130,6 +172,8 @@ export async function openFixes(tab = "fixes") {
             // The editors must stop writing into a popup that's gone.
             setPatternsScope(null);
             initTester(null);
+            renderRules(null);
+            setTarget(null);
             openPopup = null;
         },
     });

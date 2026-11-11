@@ -8,15 +8,26 @@ import { allRules } from "../rules/index.js";
 import { getSettings } from "../settings/settingsManager.js";
 import { logDebug } from "../core/debug.js";
 import { originalText, hasRecord } from "../core/saved.js";
+import { characterEntry, mergedRuleSettings } from "../core/characters.js";
 
 const MAX_CACHE = 2000;
 const cache = new Map();
-let rules = null;
+// Rule lists by character ("" = no settings of its own): each character's own patterns join in.
+const rulesBy = new Map();
 
 // Call after any settings change.
 export function invalidate() {
     cache.clear();
-    rules = null;
+    rulesBy.clear();
+}
+
+// Who wrote a reply, as the key of its per-character settings (core/characters.js): the avatar
+// file. Group replies carry it (`original_avatar`); in a one-on-one chat ST doesn't set it, and
+// the reply is the open character's.
+export function speakerOf(message, ctx = getContext()) {
+    if (typeof message?.original_avatar === "string" && message.original_avatar) return message.original_avatar;
+    if (ctx.groupId) return "";
+    return ctx.characters?.[ctx.characterId]?.avatar || "";
 }
 
 // "Rewrite saved messages" mode (st/rewrite.js): only while the master switch is on too.
@@ -88,15 +99,20 @@ export { originalText };
 // -> { text, hits, changed }. target: 'display' | 'outgoing' (each rule's "where" setting).
 // lastUser: the user's message the reply answers (echo trim compares against it).
 // history: the AI replies before this one (historyBefore), for budgets over many replies.
-export function cleanText(text, target, names = chatNames(), lastUser = "", history = []) {
+// speaker: speakerOf(message), for that character's own settings.
+export function cleanText(text, target, names = chatNames(), lastUser = "", history = [], speaker = "") {
     const s = getSettings();
     const size = budgetWindow();
     const hist = size > 1 && Array.isArray(history) ? history : [];
-    const key = `${target}\u0001${names.join("\u0002")}\u0001${lastUser}\u0001${size}\u0001${fingerprint(hist)}\u0001${text}`;
+    const entry = characterEntry(s, speaker);
+    const who = entry ? speaker : "";
+    const key = `${target}\u0001${who}\u0001${names.join("\u0002")}\u0001${lastUser}\u0001${size}\u0001${fingerprint(hist)}\u0001${text}`;
     const cached = cache.get(key);
     if (cached) return cached;
-    rules ??= allRules(s);
-    const out = runPipeline(text, rules, { names, settings: s?.rules, target, lastUser, window: { size, history: hist }, log: msg => logDebug(msg) });
+    let rules = rulesBy.get(who);
+    if (!rules) rulesBy.set(who, (rules = allRules(s, entry)));
+    const settings = mergedRuleSettings(s?.rules, entry);
+    const out = runPipeline(text, rules, { names, settings, target, lastUser, window: { size, history: hist }, log: msg => logDebug(msg) });
     if (cache.size >= MAX_CACHE) cache.delete(cache.keys().next().value);
     cache.set(key, out);
     return out;

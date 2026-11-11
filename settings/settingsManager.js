@@ -18,6 +18,8 @@ export const defaultSettings = {
     budgetWindow: 10,
     // "Your patterns" (rules/patternRules.js).
     patterns: [],
+    // Per-character fixes, keyed by avatar file (core/characters.js): only what differs from the above.
+    characters: {},
     // The stats' small store (stats/statsStore.js): stock-phrase list, pinned baselines, per-chat summaries.
     stats: { lexicon: null, pins: {}, summaries: [] },
 };

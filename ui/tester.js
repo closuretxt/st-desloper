@@ -7,6 +7,8 @@ import { runPipeline } from "../core/pipeline.js";
 import { allRules } from "../rules/index.js";
 import { getSettings } from "../settings/settingsManager.js";
 import { chatNames } from "../st/cleaner.js";
+import { mergedRuleSettings } from "../core/characters.js";
+import { getTarget, targetEntry } from "./characterTarget.js";
 
 const MAX_HIT = 160;
 const kept = { input: "", user: "", target: "display" };
@@ -31,12 +33,14 @@ export function runTester() {
 
     const s = getSettings();
     const names = chatNames();
-    const rules = allRules(s);
+    // The character picked in the popup: its overrides and own patterns.
+    const entry = targetEntry();
+    const rules = allRules(s, entry);
     const notes = [];
     const target = String($scope.find(".sd_tester_target .sd_active").attr("data-value") || "display");
     const lastUser = String($scope.find(".sd_tester_user").val() ?? "");
     // The master switch is ignored here: the tester shows what the rules would do.
-    const out = runPipeline(text, rules, { names, settings: s?.rules, target, lastUser, log: msg => notes.push(msg) });
+    const out = runPipeline(text, rules, { names, settings: mergedRuleSettings(s?.rules, entry), target, lastUser, log: msg => notes.push(msg) });
 
     output.text(out.text);
     count.text(out.hits.length ? `${out.hits.length} ${out.hits.length === 1 ? "change" : "changes"}` : "no changes");
@@ -52,6 +56,7 @@ export function runTester() {
     }
 
     const lines = [];
+    if (getTarget()) lines.push(`Settings for: ${getTarget().name}`);
     if (names.length) lines.push(`Names: ${names.join(", ")}`);
     lines.push(...notes);
     notesEl.text(lines.join("\n"));

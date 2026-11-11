@@ -7,7 +7,7 @@
 // The prompt is unchanged by the mode: st/interceptor.js cleans from the original, as before.
 
 import { getContext } from "../../../../extensions.js";
-import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, budgetWindow, rewriteActive } from "./cleaner.js";
+import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, budgetWindow, rewriteActive, speakerOf } from "./cleaner.js";
 import { originalText, writeCleaned, restoreMessage, hasRecord } from "../core/saved.js";
 import { logDebug } from "../core/debug.js";
 
@@ -17,7 +17,7 @@ export function rewriteMessage(chat, index, names = chatNames(), size = budgetWi
     // Empty: a swipe that's still being generated.
     if (!isAiMessage(m) || !m.mes) return { mes: false, data: false };
     const source = originalText(m);
-    const out = cleanText(source, "display", names, lastUserBefore(chat, index), historyBefore(chat, index, size));
+    const out = cleanText(source, "display", names, lastUserBefore(chat, index), historyBefore(chat, index, size), speakerOf(m));
     // A reply cleaned down to nothing is kept as written.
     return writeCleaned(m, source, out.changed && out.text.trim() ? out.text : null);
 }

@@ -2,7 +2,8 @@
 import { extension_settings, getContext } from "../../../extensions.js";
 import { extensionName, extensionFolderPath, LOG_PREFIX } from "./core/constants.js";
 import { logDebug } from "./core/debug.js";
-import { loadSettings, initSettingsListeners, onSettingsChanged } from "./settings/settingsManager.js";
+import { loadSettings, initSettingsListeners, onSettingsChanged, getSettings, settingsChanged } from "./settings/settingsManager.js";
+import { renameEntry, deleteEntry } from "./core/characters.js";
 import { initInterceptor } from "./st/interceptor.js";
 import { initDisplay, refreshAll, scheduleRefreshAll, setShowAllOriginals } from "./st/display.js";
 import { initStream } from "./st/stream.js";
@@ -137,6 +138,16 @@ jQuery(async () => {
             runTester();
             renderQuickRules();
             refreshPatternsSummary();
+        });
+        // Per-character fixes are keyed by avatar file: follow a rename (ST renames the file with
+        // the character), drop a deleted character's (a new one may get the same file name).
+        const E = getContext().eventTypes;
+        on(E?.CHARACTER_RENAMED, "character renamed", (oldAvatar, newAvatar) => {
+            const name = getContext().characters?.find(c => c.avatar === newAvatar)?.name;
+            if (renameEntry(getSettings(), oldAvatar, newAvatar, name)) settingsChanged();
+        });
+        on(E?.CHARACTER_DELETED, "character deleted", data => {
+            if (deleteEntry(getSettings(), data?.character?.avatar)) settingsChanged();
         });
         // The stats badge is per chat.
         on(getContext().eventTypes?.CHAT_CHANGED, "stats badge", refreshStatsBadge);

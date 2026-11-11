@@ -89,15 +89,16 @@ function passesChecks(text, m, checks) {
     return true;
 }
 
-export function patternRule(p, index = 0) {
+// prefix / base: per-character patterns (core/characters.js) use their own ids and run later.
+export function patternRule(p, index = 0, { prefix = "pattern", base = PATTERN_ORDER } = {}) {
     const scope = ["dialogue", "narration", "all"].includes(p.scope) ? p.scope : "all";
     const where = ["display", "outgoing", "both"].includes(p.where) ? p.where : "both";
     return {
-        id: `pattern:${p.id}`,
+        id: `${prefix}:${p.id}`,
         name: p.name || p.find,
         description: "",
         scope,
-        order: PATTERN_ORDER + index,
+        order: base + index,
         defaults: { enabled: p.enabled !== false, where },
         apply(text, ctx) {
             const { re, error } = compileFind(p.find);
@@ -124,9 +125,9 @@ export function patternRule(p, index = 0) {
     };
 }
 
-export function patternRules(patterns) {
+export function patternRules(patterns, opts) {
     if (!Array.isArray(patterns)) return [];
-    return patterns.filter(p => p && p.id && typeof p.find === "string" && p.find.trim()).map((p, i) => patternRule(p, i));
+    return patterns.filter(p => p && p.id && typeof p.find === "string" && p.find.trim()).map((p, i) => patternRule(p, i, opts));
 }
 
 export function newPatternId() {

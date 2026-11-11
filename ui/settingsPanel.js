@@ -1,9 +1,12 @@
 // The built-in fixes: the full cards in the fixes popup, built from each rule's `options` list
 // (no HTML per rule), and the quick on/off grid in the settings drawer. Only values that differ
-// from a rule's defaults are saved, so changed defaults in an update still reach the user.
+// from a rule's defaults are saved, so changed defaults in an update still reach the user. With a
+// character picked in the popup, the same cards edit that character's overrides instead.
 
 import { BUILTIN_RULES } from "../rules/index.js";
 import { getSettings, settingsChanged } from "../settings/settingsManager.js";
+import { characterEntry, setOverride, clearOverrides, hasOverrides } from "../core/characters.js";
+import { getTarget, targetKey, targetEntry } from "./characterTarget.js";
 
 export const WHERE_CHOICES = [
     ["both", "Both", "Shown on screen and sent to the model"],
@@ -14,15 +17,32 @@ const WHERE_ICONS = { display: "fa-eye", outgoing: "fa-paper-plane" };
 
 // Cards the user opened stay open when the list is rebuilt (a re-render must not fold them up).
 const openCards = new Set();
+// The popup's card list while it's open, so a card can show it has character overrides.
+let $cardBox = null;
 
-function current(rule) {
+// What everyone gets: the rule's defaults with the user's global changes.
+function globalValues(rule) {
     return { where: "both", ...(rule.defaults || {}), ...(getSettings().rules?.[rule.id] || {}) };
+}
+
+// char: a character's avatar key (ui/characterTarget.js), null = the global settings. The
+// popup follows its picker; the drawer's quick chips always pass null.
+function current(rule, char = targetKey()) {
+    const own = char ? characterEntry(getSettings(), char)?.rules?.[rule.id] : null;
+    return { ...globalValues(rule), ...(own || {}) };
 }
 
 export const isRuleOn = rule => current(rule).enabled !== false;
 
-function setValue(rule, key, value) {
+function setValue(rule, key, value, char = targetKey()) {
     const s = getSettings();
+    if (char) {
+        // Only what differs from the global value is kept: the rest follows the global settings.
+        setOverride(s, char, getTarget()?.name, rule.id, key, value, globalValues(rule)[key]);
+        markCustom(rule);
+        settingsChanged();
+        return;
+    }
     s.rules ??= {};
     const own = (s.rules[rule.id] ??= {});
     const fallback = key === "where" ? (rule.defaults?.where ?? "both") : rule.defaults?.[key];
@@ -30,6 +50,11 @@ function setValue(rule, key, value) {
     else own[key] = value;
     if (!Object.keys(own).length) delete s.rules[rule.id];
     settingsChanged();
+}
+
+function markCustom(rule) {
+    const custom = !!targetKey() && hasOverrides(targetEntry(), rule.id);
+    $cardBox?.find(`.sd_rule[data-rule="${CSS.escape(rule.id)}"]`).toggleClass("sd_custom", custom);
 }
 
 export function selectOf(choices, value) {
@@ -191,10 +216,17 @@ function ruleCard(rule) {
             $card.toggleClass("sd_off", !$enabled.prop("checked"));
         });
     const $chevron = $('<i class="fa-solid fa-chevron-down sd_chevron">');
+    // Shown (CSS) only while a character has its own values for this fix.
+    const $reset = $('<button type="button" class="sd_icon_button sd_reset_global" title="This character has its own settings for this fix. Click to use the global ones again."><i class="fa-solid fa-rotate-left"></i></button>').on("click", e => {
+        e.stopPropagation();
+        if (clearOverrides(getSettings(), targetKey(), rule.id)) settingsChanged();
+        $card.replaceWith(ruleCard(rule));
+    });
     const $head = $('<div class="sd_card_head">').append(
         $enabled.on("click", e => e.stopPropagation()),
         $('<div class="sd_card_title">').append($('<b class="sd_card_name">').text(rule.name), $('<div class="sd_card_desc">').html(descriptionHtml(rule.description))),
         whereControl(values.where, v => setValue(rule, "where", v)),
+        $reset,
         $chevron,
     );
     const toggle = () => {
@@ -230,13 +262,17 @@ function ruleCard(rule) {
         $body.append($('<div class="sd_note">').text("No options: on or off is all there is."));
     }
     $card.append($body);
-    $card.toggleClass("sd_off", values.enabled === false).toggleClass("sd_open", openCards.has(rule.id));
+    $card
+        .toggleClass("sd_off", values.enabled === false)
+        .toggleClass("sd_open", openCards.has(rule.id))
+        .toggleClass("sd_custom", !!targetKey() && hasOverrides(targetEntry(), rule.id));
     return $card;
 }
 
-// The full cards, inside the fixes popup ($box is its list container).
+// The full cards, inside the fixes popup ($box is its list container; null when it closes).
 export function renderRules($box) {
-    if (!$box?.length) return;
+    $cardBox = $box?.length ? $box : null;
+    if (!$cardBox) return;
     $box.empty();
     for (const rule of BUILTIN_RULES) $box.append(ruleCard(rule));
 }
@@ -256,12 +292,12 @@ export function renderQuickRules() {
     $box.empty();
     let on = 0;
     for (const rule of BUILTIN_RULES) {
-        const values = current(rule);
+        const values = current(rule, null);
         const enabled = values.enabled !== false;
         if (enabled) on++;
         const $input = switchInput()
             .prop("checked", enabled)
-            .on("change", () => setValue(rule, "enabled", $input.prop("checked")));
+            .on("change", () => setValue(rule, "enabled", $input.prop("checked"), null));
         const $chip = $('<label class="sd_chip sd_switch_label">')
             .attr("title", rule.description || rule.name)
             .toggleClass("sd_off", !enabled)

@@ -17,7 +17,7 @@
 // reply, newest first, and a long refresh yields to the browser between slices.
 
 import { getContext } from "../../../../extensions.js";
-import { cleanText, isAiMessage, lastUserBefore, chatNames, historyBefore, budgetWindow, originalText, rewriteActive } from "./cleaner.js";
+import { cleanText, isAiMessage, lastUserBefore, chatNames, historyBefore, budgetWindow, originalText, rewriteActive, speakerOf } from "./cleaner.js";
 import { rewriteMessage, syncChat, saveSoon } from "./rewrite.js";
 import { getSettings } from "../settings/settingsManager.js";
 import { logDebug } from "../core/debug.js";
@@ -152,7 +152,7 @@ export function refreshMessage(id, { render: doRender = true, force = false, dir
         if (rewrite) {
             if (message.mes !== source) cleaned = message.mes;
         } else {
-            const out = cleanText(source, "display", names ?? chatNames(), lastUserBefore(ctx.chat, n), historyBefore(ctx.chat, n, size ?? budgetWindow()));
+            const out = cleanText(source, "display", names ?? chatNames(), lastUserBefore(ctx.chat, n), historyBefore(ctx.chat, n, size ?? budgetWindow()), speakerOf(message, ctx));
             // A reply cleaned down to nothing is shown as written.
             if (out.changed && out.text.trim()) cleaned = out.text;
         }

@@ -7,6 +7,7 @@
 //                 ends, 3+ empty lines, zero-width characters, a no-break space between words
 //   italics       an *italic left open runs to the end of its line: it gets closed; a stray
 //                 closing * with no opener goes
+//   slips         "from the his" -> "from his", "the the" -> "the", "…," -> "…"
 //   mojibake      don‚Äôt / Ã© (text decoded twice): put back
 //   ellipses      one style: leave / ... / …   (off by default: "leave")
 //   punctuation   "What?!?!" -> "What?!", "No!!!" -> "No!"   (off by default: some like it loud)
@@ -134,6 +135,18 @@ function punctuation(s) {
     return s.replace(/[?!]{2,}/g, m => (m.includes("?") && m.includes("!") ? (m.indexOf("?") < m.indexOf("!") ? "?!" : "!?") : m[0]));
 }
 
+// Typing slips: "a hand's width from the his" -> "from his" (an article left in front of a
+// possessive), "the the" -> "the", "that's…, that's" -> "that's… that's". Pronoun doubles
+// ("gave her her keys") are real English and stay.
+function slips(s) {
+    return s
+        // Keep the capital when the article started a sentence: "The his" -> "His".
+        .replace(/\b(?:the|a|an) ((?:his|her|my|your|their|our|its)\b)/gi, (all, pos) => (/^[A-Z]/.test(all) ? pos.charAt(0).toUpperCase() + pos.slice(1) : pos))
+        // Not "is is" / "had had" / "that that": "What it is is…" is real English.
+        .replace(/\b(the|a|an|to|of|and|on|at)\s+\1\b/gi, "$1")
+        .replace(/(…|\.\.\.),(?=\s)/g, "$1");
+}
+
 // A few characters either side of the first change, for the tester and the stats.
 function snippet(a, b) {
     let p = 0;
@@ -151,6 +164,7 @@ const PARTS = [
     { key: "quotes", label: "quotes", fn: () => quotes },
     { key: "spaces", label: "spaces", fn: () => spaces },
     { key: "italics", label: "italics", fn: () => italics },
+    { key: "slips", label: "typing slips", fn: () => slips },
     { key: "ellipsis", label: "ellipses", fn: s => (s.ellipsis === "..." || s.ellipsis === "…" ? ellipses(s.ellipsis) : null) },
     { key: "punctuation", label: "punctuation", fn: () => punctuation },
 ];
@@ -161,12 +175,13 @@ export default {
     description: "Curly quotes and apostrophes made straight, extra spaces gone, an *italic left open closed, mojibake (donâ€™t) put back: “Hi.”  She  smiles . → \"Hi.\" She smiles.",
     scope: "message",
     order: 5,
-    defaults: { enabled: true, apostrophes: true, quotes: true, spaces: true, italics: true, mojibake: true, ellipsis: "leave", punctuation: false },
+    defaults: { enabled: true, apostrophes: true, quotes: true, spaces: true, italics: true, slips: true, mojibake: true, ellipsis: "leave", punctuation: false },
     options: [
         { key: "apostrophes", type: "checkbox", label: "Curly apostrophes → ' (don’t → don't)" },
         { key: "quotes", type: "checkbox", label: "Curly double quotes → \" (and doubled \"\" → \")" },
         { key: "spaces", type: "checkbox", label: "Extra spaces, space before punctuation, missing space after it, extra empty lines" },
         { key: "italics", type: "checkbox", label: "Close an *italic left open; drop a stray *" },
+        { key: "slips", type: "checkbox", label: "Typing slips: from the his → from his, the the → the, that's…, → that's…" },
         { key: "mojibake", type: "checkbox", label: "Fix mojibake (donâ€™t → don’t, Ã© → é)" },
         { key: "punctuation", type: "checkbox", label: "Shorten runs: !!! → !, ?!?! → ?!" },
         { key: "ellipsis", type: "select", label: "Ellipsis style", choices: ["leave", "...", "…"] },

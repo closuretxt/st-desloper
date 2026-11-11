@@ -435,6 +435,90 @@
     font-weight: 700;
 }
 
+/* Per-character fixes: the picker, and what changes while a character is picked. */
+.st-desloper-settings .sd_char_pick_wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    align-self: center;
+}
+
+.st-desloper-settings .sd_char_pick_wrap > i {
+    opacity: var(--sd-muted);
+    font-size: 0.85em;
+}
+
+.st-desloper-settings .sd_char_pick {
+    width: auto;
+    min-width: 11em;
+    max-width: 18em;
+    margin: 0;
+}
+
+.st-desloper-settings.sd_char_mode .sd_char_pick {
+    border-color: var(--sd-accent);
+}
+
+.st-desloper-settings.sd_char_mode .sd_scope_note {
+    color: var(--sd-accent);
+    opacity: 1;
+}
+
+/* The budget window is the same for everyone. */
+.st-desloper-settings.sd_char_mode .sd_budget_row {
+    display: none;
+}
+
+.st-desloper-settings .sd_reset_global {
+    display: none;
+}
+
+.st-desloper-settings .sd_rule.sd_custom .sd_reset_global {
+    display: inline-block;
+    opacity: 1;
+    color: var(--sd-accent);
+}
+
+.st-desloper-settings .sd_rule.sd_custom {
+    border-color: var(--sd-accent-soft);
+}
+
+.st-desloper-settings .sd_pattern_globals {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-top: 14px;
+}
+
+.st-desloper-settings .sd_pattern_globals[hidden] {
+    display: none;
+}
+
+.st-desloper-settings .sd_global_pattern {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    border-radius: var(--sd-radius);
+    background: var(--sd-glass);
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_global_pattern .sd_card_desc {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
+.st-desloper-settings .sd_global_pattern.sd_off .sd_card_name {
+    opacity: 0.45;
+}
+
+.st-desloper-settings .sd_global_pattern.sd_custom {
+    box-shadow: inset 2px 0 0 var(--sd-accent);
+}
+
 .st-desloper-settings .sd_toolbar {
     display: flex;
     flex-wrap: wrap;

@@ -6,6 +6,8 @@ import { getSettings, settingsChanged } from "../settings/settingsManager.js";
 import { blankPattern, compileFind, importPatterns, exportPatterns } from "../rules/patternRules.js";
 import { selectOf, whereControl, switchInput } from "./settingsPanel.js";
 import { notify } from "../core/debug.js";
+import { ensurePatterns, dropIfEmpty, setOverride } from "../core/characters.js";
+import { getTarget, targetKey, targetEntry } from "./characterTarget.js";
 
 const SCOPE_CHOICES = [
     ["all", "Speech and narration"],
@@ -26,10 +28,22 @@ export function setPatternsScope($root) {
     $scope = $root?.length ? $root : null;
 }
 
-function patterns() {
+function globalPatterns() {
     const s = getSettings();
     if (!Array.isArray(s.patterns)) s.patterns = [];
     return s.patterns;
+}
+
+// The list being edited: the global one, or the picked character's (ui/characterTarget.js).
+// Reading never creates a character entry; adding does (writablePatterns).
+function patterns() {
+    if (!targetKey()) return globalPatterns();
+    const list = targetEntry()?.patterns;
+    return Array.isArray(list) ? list : [];
+}
+
+function writablePatterns() {
+    return targetKey() ? ensurePatterns(getSettings(), targetKey(), getTarget()?.name) : globalPatterns();
 }
 
 function findError(find) {
@@ -66,6 +80,7 @@ function patternCard(p) {
         const list = patterns();
         const i = list.findIndex(x => x.id === p.id);
         if (i >= 0) list.splice(i, 1);
+        if (targetKey()) dropIfEmpty(getSettings(), targetKey());
         openCards.delete(p.id);
         save();
         renderPatterns();
@@ -145,26 +160,61 @@ function patternCard(p) {
     return $card;
 }
 
+const countOf = list => ({ total: list.length, on: list.filter(p => p.enabled !== false).length });
+
+// The drawer's summary: always the global list.
 export function patternsSummary() {
-    const list = patterns();
-    const on = list.filter(p => p.enabled !== false).length;
-    return { total: list.length, on };
+    return countOf(globalPatterns());
+}
+
+// With a character picked: the global patterns, each with a switch for this character only.
+// Saved as an override of the pattern's rule ("pattern:<id>"), like the built-in fixes.
+function globalPatternRow(p) {
+    const ruleId = `pattern:${p.id}`;
+    const globalOn = p.enabled !== false;
+    const own = targetEntry()?.rules?.[ruleId]?.enabled;
+    const $sw = switchInput()
+        .prop("checked", own ?? globalOn)
+        .on("change", () => {
+            const on = $sw.prop("checked");
+            setOverride(getSettings(), targetKey(), getTarget()?.name, ruleId, "enabled", on, globalOn);
+            $row.toggleClass("sd_off", !on).toggleClass("sd_custom", on !== globalOn);
+            settingsChanged();
+        });
+    const $row = $('<label class="sd_switch_label sd_global_pattern">')
+        .attr("title", globalOn ? "On for everyone" : "Off for everyone")
+        .append($sw, $('<span class="sd_card_name">').text(titleOf(p)), $('<span class="sd_card_desc sd_mono">').text(p.name?.trim() ? p.find || "" : ""))
+        .toggleClass("sd_off", !(own ?? globalOn))
+        .toggleClass("sd_custom", own !== undefined && own !== globalOn);
+    return $row;
 }
 
 export function renderPatterns() {
     if (!$scope) return;
     const $list = $scope.find(".sd_pattern_list").empty();
     const list = patterns();
+    const who = getTarget()?.name;
     if (!list.length) {
         $list.append(
             $('<div class="sd_empty">').append(
                 $('<i class="fa-solid fa-magnifying-glass">'),
-                $("<div>").text("No patterns yet. Add one, import ST Regex scripts, or make one from a reused phrase in the stats."),
+                $("<div>").text(
+                    who
+                        ? `No patterns just for ${who} yet. They run only on ${who}'s replies, after the global ones.`
+                        : "No patterns yet. Add one, import ST Regex scripts, or make one from a reused phrase in the stats.",
+                ),
             ),
         );
     }
     for (const p of list) $list.append(patternCard(p));
-    const { total, on } = patternsSummary();
+    const $globals = $scope.find(".sd_pattern_globals").empty();
+    const globals = targetKey() ? globalPatterns() : [];
+    $globals.prop("hidden", !globals.length);
+    if (globals.length) {
+        $globals.append($('<div class="sd_section_head">').append($('<span class="sd_section_title">').text(`Global patterns for ${who}`)));
+        for (const p of globals) $globals.append(globalPatternRow(p));
+    }
+    const { total, on } = countOf(list);
     $scope.find(".sd_tab_count_patterns").text(total ? `${on}/${total}` : "");
 }
 
@@ -186,7 +236,7 @@ export function initPatternsEditor($root) {
     renderPatterns();
     $root.find(".sd_pattern_add").on("click", () => {
         const p = blankPattern();
-        patterns().push(p);
+        writablePatterns().push(p);
         openCards.add(p.id);
         settingsChanged();
         renderPatterns();
@@ -206,7 +256,7 @@ export function initPatternsEditor($root) {
         if (file.size > 2 * 1024 * 1024) return notify("That file is too big to be a patterns file.", "error");
         try {
             const { patterns: added, skipped } = importPatterns(JSON.parse(await file.text()));
-            patterns().push(...added);
+            if (added.length) writablePatterns().push(...added);
             settingsChanged();
             renderPatterns();
             notify(`Imported ${added.length} pattern(s)${skipped ? `, skipped ${skipped} (not for AI replies, or empty)` : ""}.`, added.length ? "success" : "warning");

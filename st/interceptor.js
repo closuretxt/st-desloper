@@ -4,7 +4,8 @@
 // All of history, every generation: old tics never reach the model, so it has less to copy.
 
 import { getSettings } from "../settings/settingsManager.js";
-import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, originalText, budgetWindow } from "./cleaner.js";
+import { getContext } from "../../../../extensions.js";
+import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, originalText, budgetWindow, speakerOf } from "./cleaner.js";
 import { logDebug } from "../core/debug.js";
 
 export function initInterceptor() {
@@ -13,6 +14,7 @@ export function initInterceptor() {
             if (!getSettings()?.enabled || !Array.isArray(chat)) return;
             const started = performance.now();
             const names = chatNames();
+            const stCtx = getContext();
             // On "continue" the model writes on from the end of the last reply, and the result
             // is glued onto the saved text: that reply must reach the model exactly as saved.
             let skip = -1;
@@ -39,7 +41,7 @@ export function initInterceptor() {
                 // is cleaned from the original with the prompt's own settings, so both modes send
                 // the model the same thing. (A continued reply above goes as saved either way.)
                 const source = originalText(m);
-                const out = cleanText(source, "outgoing", names, lastUsers[i], histories[i]);
+                const out = cleanText(source, "outgoing", names, lastUsers[i], histories[i], speakerOf(m, stCtx));
                 if (!out.changed || !out.text.trim()) {
                     m.mes = source;
                     continue;
