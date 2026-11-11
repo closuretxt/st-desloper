@@ -70,6 +70,22 @@ const formOf = verb => (/ing$/i.test(verb) ? "ing" : /ed$/i.test(verb) ? "past" 
 // that fits any replacement ("her breath hitches again" -> "her breath catches again").
 const CLAUSE_END = String.raw`(?=\s*[.,;:!?…"”*)\]—–]|\s+(?:and|as|at|when|while|before|then|but|again|once|slightly|sharply|briefly)\b|\s*$)`;
 
+// "He shrugs the way most people do." A simile tail that compares to nobody in particular, so it
+// adds nothing: it goes. Only with a generic crowd ("the way she does" names who, so it stays),
+// only at the clause's end ("the way people do things" keeps going), and never after a word that
+// makes "the way" an object or a set phrase: "by the way", "I like the way…", "all the way",
+// "That's not the way most people do." A sentence can't start with it ("The way most people do
+// is…"): a word must come before.
+const WAY_NOT_AFTER = "by|like|likes|liked|love|loves|loved|hate|hates|hated|see|sees|saw|seen|notice|notices|noticed|know|knows|knew|admire|admires|admired|enjoy|enjoys|enjoyed|prefer|prefers|preferred|mind|minds|minded|about|all|of|on|in|into|to|from|for|with|at|is|was|are|were|be|been|being|isn['’]t|wasn['’]t|that['’]s|it['’]s|what['’]s|not|that|this|the|what|exactly|just|change|changes|changed|lead|leads|led|show|shows|showed|find|finds|found|lose|loses|lost|ask|asks|asked|block|blocks|blocked|clear|clears|cleared|pave|paves|paved|light|lights|lit";
+const WAY_WHO = "most\\s+people|most\\s+of\\s+us|other\\s+people|people|everyone(?:\\s+else)?|everybody(?:\\s+else)?|anyone(?:\\s+else)?|anybody(?:\\s+else)?|someone|somebody|others|most|most\\s+(?:men|women|folks|guys|girls)|folks|normal\\s+people";
+const WAY_VERB = "(?:(?:always|usually|often|normally|sometimes)\\s+)?(?:do|does|did|would(?:\\s+have)?|might(?:\\s+have)?|will|could|tend\\s+to|tended\\s+to|seem\\s+to|seemed\\s+to)";
+const wayTail = who =>
+    new RegExp(
+        String.raw`(?<=[\p{L}\p{N}'’])(?<!\b(?:${WAY_NOT_AFTER}))(?:,\s*|\s+)(?:(?:just|exactly|much)\s+)?the\s+(?:same\s+)?way\s+(?:${who})\s+${WAY_VERB}(?=\s*[.,;:!?…"”*)\]—–]|\s+(?:and|but|then)\b|\s*$)`,
+        "giu",
+    );
+const WAY_TAIL = wayTail(WAY_WHO);
+
 const SHIVER_PRESENT_SG = "runs|races|crawls|creeps|travels|goes|shoots|slides|ripples|snakes|skitters|courses|dances|trickles|rolls";
 const SHIVER_PRESENT_PL = "run|race|crawl|creep|travel|go|shoot|slide|ripple|snake|skitter|course|dance|trickle|roll";
 const SHIVER_PAST = "ran|raced|crawled|crept|traveled|travelled|went|shot|slid|rippled|snaked|skittered|coursed|danced|trickled|rolled";
@@ -122,6 +138,9 @@ function grammar(names) {
     const GLINT = String.raw`with\s+(?:(?:a|the)\s+(?:mischievous|playful|knowing|wicked|devilish|impish)\s+(?:glint|twinkle|sparkle|gleam)|a\s+(?:glint|twinkle|sparkle|gleam)\s+of\s+(?:mischief|amusement|mirth))\s+in\s+${POSS}\s+eyes?`;
     const AFTER = String.raw`(?=\s*[.!?;…,"”*]|\s*$)`;
     const g = {
+        // "the way she always did", "the way Seraphina does", "the way her mother did": only with
+        // the "also when it names who" switch on (that loses who it compares to).
+        wayNamed: wayTail(String.raw`she|he|they|i|you|we|it|${NAMES}|(?:her|his|their|my|your|our|the)\s+[\p{L}'’-]+`),
         whisper: new RegExp(
             String.raw`\b(?:(in an?)\s+(voice|tone|murmur)(?:,?\s+(?:that's|that is|that was|which was))?,?\s+|(voice|words|tone)(\s+(?:is|was|are|were|comes out|came out|coming out))?\s+|(${SPEECH_FORMS.join("|")})(,)?\s+)${WHISPER}`,
             "gi",
@@ -229,8 +248,14 @@ function grammar(names) {
             String.raw`,?\s+(?:like|as\s+if|as\s+though)\s+(?:${PRON}(?:['’]s|['’]re|\s+(?:is|was|were|are))?\s+)?(?:(?:tasting|savou?ring)\s+(it|the\s+(?:word|words|name|sound|phrase|question|idea|syllables?)|each\s+(?:word|syllable))|testing\s+(?:out\s+)?(?:the\s+(?:word|words|name|sound|phrase)|each\s+(?:word|syllable)))(?:\s+out)?(?:\s+on\s+${POSS}\s+tongue)?(?:\s+for\s+the\s+first\s+time)?(?:,?\s+(?:and\s+)?(?:rolling|turning)\s+it\s+(?:around|over)(?:\s+(?:on|in)\s+${POSS}\s+(?:tongue|mouth|head))?)?(?=\s*[.;!?…"”*)\]—–]|\s*$|,\s)`,
             "giu",
         ),
-        // "Her mouth opens, closes, opens again." A whole sentence of nothing but that beat.
-        mouthOpens: new RegExp(String.raw`${SENT_START}(?:${POSS}\s+)?mouth\s+(?:opens|opened|falls\s+open|fell\s+open),\s+(?:then\s+)?(?:closes|closed|shuts|shut|snaps\s+shut|snapped\s+shut)(?:,?\s+(?:and\s+|then\s+)?(?:opens|opened)\s+again)?(?:,?\s+(?:and\s+|then\s+)?(?:closes|closed|shuts|shut)\s+again)?[.!]+["”*]?(?:\s+|$)`, "giu"),
+        // "Her mouth opens, closes, opens again." / "Her mouth opens. Closes." Nothing but that
+        // beat, as one sentence or split into fragments.
+        mouthOpens: (() => {
+            const SEP = String.raw`(?:,\s+(?:and\s+|then\s+)?|[.…]+\s+(?:then\s+)?|\s+(?:and|then)\s+)`;
+            const OPEN = String.raw`(?:opens|opened|falls\s+open|fell\s+open)`;
+            const CLOSE = String.raw`(?:closes|closed|shuts|shut|snaps\s+shut|snapped\s+shut)`;
+            return new RegExp(String.raw`${SENT_START}(?:${POSS}\s+)?mouth\s+${OPEN}${SEP}${CLOSE}(?:${SEP}(?:opens|opened)(?:\s+again)?)?(?:${SEP}${CLOSE}(?:\s+again)?)?[.!…]+["”*]?(?:\s+|$)`, "giu");
+        })(),
         // "her cheeks flushing a deeper shade of pink that reaches all the way to her ears"
         // -> "her cheeks flushing pink to her ears". The colour and where it goes stay.
         shade: /\b(?:an?\s+)?(?:even\s+)?(?:deeper|darker|brighter|richer|new|fresh|vivid|alarming|impressive|lovely|pretty|interesting|charming)\s+shade\s+of\s+(?=(?:pink|red|crimson|scarlet|rose|vermilion|cherry|magenta)\b)/gi,
@@ -248,6 +273,14 @@ function grammar(names) {
             String.raw`(?<=\b(?:eyes|gaze|stare)\s+(?:(?:stay|stays|stayed|remain|remains|remained|linger|lingers|lingered|rest|rests|rested|settle|settles|settled|are|is|were|was)\s+)?(?:(?:still|fixed|locked|glued|trained|firmly|steadily|intently)\s+)*on\s+[^,.!?;\n"“”]{1,40}),\s+watching(?=\s*[,.;!?…"”*)\]—–]|\s*$)`,
             "giu",
         ),
+        // "Without thinking, she…" openers: a fixed list of filler only. "Without the key, she…"
+        // and "Without warning, the roof…" (the suddenness is the point) stay. Mid-sentence only the
+        // pure-filler ones, at a clause end: "she answers without thinking" can be the point.
+        withoutStart: new RegExp(
+            String.raw`${SENT_START}without\s+(?:(?:even\s+)?thinking(?:\s+twice|\s+about\s+it)?|(?:a\s+)?(?:second|moment['’]s)\s+(?:thought|hesitation)|hesitation|hesitating|(?:even\s+)?missing\s+a\s+beat|(?:another|a(?:\s+single)?)\s+word|(?:further\s+)?(?:ado|preamble|ceremony))\s*,\s+(\p{L})`,
+            "giu",
+        ),
+        withoutTail: /(?<=[\p{L}\p{N}'’])(?:,\s*|\s+)without\s+(?:(?:a\s+moment['’]s\s+|any\s+|the\s+slightest\s+|a\s+trace\s+of\s+)?hesitation|hesitating|(?:even\s+)?missing\s+a\s+beat|a\s+second\s+thought|(?:further\s+)?(?:ado|preamble))(?=\s*[.,;!?…"”*)\]—–]|\s*$)/giu,
         eternity: /\bwhat\s+(?:felt|feels|seemed|seems)\s+like\s+(?:an\s+)?eternity\b/gi,
         adams: new RegExp(String.raw`,\s*(?:${POSS}\s+)?adam['’]s\s+apple\s+(?:bobbing|bobs|bobbed)(?:\s+(?:as\s+(?:he|she|they)\s+(?:swallows|swallowed|swallow)|once|visibly))?(?=\s*[.!?;…"”*]|\s*$)`, "gi"),
     };
@@ -474,7 +507,7 @@ export const ENTRIES = [
     {
         id: "mouth-opens",
         label: "her mouth opens, closes, opens again",
-        example: "Her mouth opens, closes, opens again. → removed (when the reply has more)",
+        example: "Her mouth opens, closes, opens again. / Her mouth opens. Closes. → removed (when the reply has more)",
         find(text, g) {
             return [...each(g.mouthOpens, text)].filter(m => hasRest(text, m)).map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
         },
@@ -630,6 +663,27 @@ export const ENTRIES = [
         },
     },
     {
+        id: "the-way-people-do",
+        label: "the way most people do",
+        example: "He shrugs the way most people do. → He shrugs.  She smiled the way everyone did, tired. → She smiled, tired.  With the switch below: She hums the way she always did. → She hums.",
+        find(text, g, pickFrom, ctx) {
+            const out = [...each(WAY_TAIL, text)].map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
+            if (ctx?.settings?.wayNamed) for (const m of each(g.wayNamed, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            return out;
+        },
+    },
+    {
+        id: "without-opener",
+        label: "Without thinking, she…",
+        example: "Without thinking, she grabs his hand. → She grabs his hand.  He answers without hesitation. → He answers.  (Without the key, she… stays)",
+        find(text, g) {
+            const out = [];
+            for (const m of each(g.withoutStart, text)) out.push({ start: m.index, end: m.index + m[0].length, text: m[1].toUpperCase() });
+            for (const m of each(g.withoutTail, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            return out;
+        },
+    },
+    {
         id: "adams-apple",
         label: "his Adam's apple bobbing",
         example: "He swallows, his Adam's apple bobbing. → He swallows.",
@@ -649,9 +703,10 @@ export default {
     description: "Rewrites stock phrases in the shapes where the meaning survives: her voice barely above a whisper → her voice low; She can't help but smile. → She smiles.",
     scope: "all",
     order: 150,
-    defaults: { enabled: true, inDialogue: false, off: [], pools: {} },
+    defaults: { enabled: true, inDialogue: false, wayNamed: false, off: [], pools: {} },
     options: [
         { key: "inDialogue", type: "checkbox", label: "Also inside dialogue (a character's own words)" },
+        { key: "wayNamed", type: "checkbox", label: '"the way most people do": also when it names who ("the way she always did")' },
         { key: "off", type: "phrases", label: "Phrases (switch one off to leave it as written; edit the choices, separated by |)" },
     ],
     entries: ENTRIES,

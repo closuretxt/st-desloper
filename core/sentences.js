@@ -22,6 +22,8 @@ function isBoundary(text, start, termStart, termEnd, next) {
     // A single period after a known abbreviation or an initial ("J. R.") isn't an end.
     if (text.slice(termStart, termEnd) === ".") {
         const word = (text.slice(start, termStart).match(/([A-Za-z.]+)$/) || [])[1] || "";
+        // "No. 5" is an abbreviation; "No. You can't." is the word no, so only before a number.
+        if (word.toLowerCase() === "no") return !/\d/.test(next);
         if (ABBREVIATIONS.has(word.toLowerCase())) return false;
         if (/^[A-Z]$/.test(word)) return false;
     }

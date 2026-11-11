@@ -7,6 +7,7 @@
 //   "You can't just say that!" She laughs.      -> She laughs.
 //   …she leans into him. And for now, that was enough.  -> …she leans into him.  (narration,
 //                                                  only as the reply's last line)
+//   "Say it again." / "You don't get to leave." / "There's a difference."  -> removed (speech)
 // The shared repair step fixes what's left: an emptied quote goes and its attribution's action
 // stays ('"You can't just say that!" she says, turning red.' -> "She turns red.").
 //
@@ -57,6 +58,17 @@ const PROTEST = [
     re(String.raw`${LEAD}(?:don't|do not) just say (?:things|stuff) like (?:that|this)${END}`),
     re(String.raw`${LEAD}how (?:can|could) you (?:just )?(?:say|ask) ${WHAT} ${HOW}(?: ${HOW})*${END}`),
 ];
+
+// ---- dramatic replays of the user's words ----------------------------------------------
+// "Say it again." / "You don't get to do that." / "There's a difference." The character making a
+// scene out of what was just said. "Say that again?" (didn't hear) stays: only ., ! or … endings.
+// "There's a difference between X and Y" says what the difference is, so only the bare line goes.
+const DRAMA = [
+    re(String.raw`${LEAD}(?:(?:please|god|gods|no|wait|again)[,.!…]*\s+)*say (?:it|that|those words|my name)(?: (?:again|one more time|once more|out loud))+(?:,? (?:please|for me))?[.!…~]*$`),
+    re(String.raw`${LEAD}(?:(?:no|and|but|so)[,.]?\s+)*you (?:don't|do not|didn't|did not) get to\b`),
+    re(String.raw`${LEAD}there(?:'s| is| was) a (?:big |huge |real |massive |world of )?difference${END}`),
+];
+const DRAMA_QUESTION = /\?[^.!…]*$/;
 
 // ---- moral closers ---------------------------------------------------------------------
 // The narrator's last line summing up the feeling: "And for now, that was enough." Only as the
@@ -118,6 +130,11 @@ export const ENTRIES = [
         id: "owe-me",
         label: '"But you owe me a big dinner."',
         example: '"Okay. But you owe me a big dinner after this. The fancy one with the cake." → "Okay."  Only as the quote\'s last line; "You owe me. I saved your life." stays.',
+    },
+    {
+        id: "drama",
+        label: '"Say it again." / "You don\'t get to…"',
+        example: '"Say it again. You don\'t get to just leave. There\'s a difference." → removed; "Say that again?" (didn\'t hear) stays',
     },
 ];
 
@@ -207,6 +224,11 @@ export default {
             }
             if (speech && !off.has("protest") && PROTEST.some(r => r.test(l))) {
                 edits.push(sentenceEdit(s, { kind: "protest", label: ENTRIES[2].label }));
+                return;
+            }
+            // "You don't get to decide that. I do." The next line leans on it: both stay.
+            if (speech && !off.has("drama") && !DRAMA_QUESTION.test(l) && DRAMA.some(r => r.test(l)) && !leansNext(i)) {
+                edits.push(sentenceEdit(s, { kind: "drama", label: ENTRIES[6].label }));
                 return;
             }
             if (!speech && !off.has("moral-closer") && i === sents.length - 1 && lastText(ctx) && (i > 0 || othersHaveText(ctx)) && MORAL.some(r => r.test(l))) {
