@@ -19,8 +19,14 @@
 // line. The narrator's hook goes only as the reply's very last sentence. Mid-reply they stay: there
 // they can be the plot ("Hurry! The bridge is going!" then more). The "before it gets cold" tail
 // is cut anywhere it ends a sentence with a real instruction in front of it.
+//
+// The waiting beat ("wait-beat") is the narration's call to action: the character freezes and
+// hands the turn to the user ("…, looking up at him, waiting." / "She waits for his answer." /
+// "…and looks at him expectantly."). Banned anywhere in narration, not budgeted (the user,
+// 2026-11-11: "that's a call to action"). The tail goes; a sentence that's only the beat goes
+// when the narration keeps another sentence.
 
-import { sentencesAt, looseOf, LEAD, sentenceEdit, applyEdits, offSet, othersHaveText } from "../core/speech.js";
+import { sentencesAt, looseOf, LEAD, sentenceEdit, applyEdits, offSet, othersHaveText, persons } from "../core/speech.js";
 
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const re = s => new RegExp(s, "u");
@@ -83,7 +89,41 @@ export const ENTRIES = [
     { id: "dare-mid", label: "Dares mid-reply", example: '"Okay, I\'m ready. Give me your best shot." She leans in. → "Okay, I\'m ready." She leans in.  Only when the quote has another line.' },
     { id: "rush", label: 'Made-up rush ("…before it sells out!")', example: '"Lift me up before the claw warms up!" → "Lift me up!"  Also "…before someone else grabs it", "…before the line gets long".' },
     { id: "hook", label: 'Narrator\'s hook ("What do you do?")', example: "…the door creaks open. What do you do? → …the door creaks open.  Only as the reply's last sentence." },
+    { id: "wait-beat", label: 'Waiting beat (", looking up at him, waiting.")', example: "She pulls back, looking up at him, waiting. → She pulls back.  Also \"She waits for his answer.\", \"…and looks at him expectantly.\" Anywhere in narration." },
 ];
+
+// The waiting beat, built once per name list (on the text as written, so "iu").
+const waitCache = new Map();
+function waitMatchers(names) {
+    const p = persons(names);
+    if (waitCache.has(p.NAMES)) return waitCache.get(p.NAMES);
+    const WHO = String.raw`(?:${p.POSS}(?:\s+(?:face|eyes))?|him|her|them|you|me|${p.NAMES})(?![\p{L}'’])`;
+    const WHO_SUBJ = String.raw`(?:he|she|they|you|${p.NAMES})`;
+    // What may follow "waiting": who for, what for, how.
+    const FOR = String.raw`(?:\s+(?:for\s+(?:${p.POSS}|an?|the)\s+(?:answer|response|reply|move|next\s+move|decision|verdict|reaction|turn)|for\s+(?:him|her|them|you|${p.NAMES})\s+to\s+(?:answer|respond|reply|speak|talk|say\s+something|decide|react|continue|go\s+on|make\s+(?:a|the\s+first|the\s+next|${p.POSS})\s+move)|to\s+see\s+what\s+${WHO_SUBJ}(?:\s+(?:will|would)|['’]ll|['’]d)?\s+(?:do|does|did|say|says|said|decide|decides|decided)))?`;
+    const HOW = String.raw`(?:\s+(?:patiently|expectantly|quietly|silently|eagerly|hopefully))?`;
+    const WAIT = String.raw`(?:waiting${FOR}${HOW}|expectant)`;
+    const LOOK = String.raw`(?:\s+(?:up|down|back|over))?\s+at\s+${WHO}`;
+    const LOOK_ING = String.raw`(?:looking|gazing|peering|staring)${LOOK}`;
+    const LOOK_FIN = String.raw`(?:looks|looked|gazes|gazed|peers|peered|stares|stared)${LOOK}`;
+    const END = String.raw`(?=[*_]{0,3}[.!?…~])`;
+    const c = {
+        tail: [
+            // ", looking up at him, waiting." / ", looking at him expectantly." / ", waiting."
+            new RegExp(String.raw`,\s+(?:${LOOK_ING}(?:\s+expectantly)?,\s+${WAIT}|${LOOK_ING}\s+expectantly|${WAIT})${END}`, "giu"),
+            // "…and waits for his answer." / "…and looks at him expectantly."
+            new RegExp(String.raw`,?\s+and\s+(?:(?:waits|waited)${FOR}${HOW}|${LOOK_FIN}(?:\s+expectantly|,\s+${WAIT}))${END}`, "giu"),
+        ],
+        // A bare ", waiting." goes only after a person ("She leans back, waiting."), not after
+        // "The taxi idles at the curb, waiting."
+        bare: /^,\s+(?:waiting|expectant)$/iu,
+        person: new RegExp(String.raw`^[*_]?${p.SUBJ}(?![\p{L}'’])`, "u"),
+        sentence: new RegExp(String.raw`^[*_]?(?:(?:Then|And|Now|So),?\s+)?(?:${p.SUBJ}\s+)?(?:(?:just|simply|only|then|merely|still)\s+)?(?:(?:waits|waited)${FOR}${HOW}|${LOOK_FIN}(?:\s+expectantly|,\s+${WAIT})),?[.!…]+[*_]?$`, "iu"),
+    };
+    if (waitCache.size > 20) waitCache.clear();
+    waitCache.set(p.NAMES, c);
+    return c;
+}
 
 // Matchers for one name list (built once per list).
 const cache = new Map();
@@ -226,6 +266,28 @@ export default {
                 for (const s of dares) {
                     edits.push(sentenceEdit(s, { kind: "hurry", part: "dare-mid", label }));
                     gone.add(s);
+                }
+            }
+        }
+
+        // The waiting beat, anywhere in narration.
+        if (!speech && !off.has("wait-beat")) {
+            const w = waitMatchers(ctx.names);
+            const label = ENTRIES.find(e => e.id === "wait-beat").label;
+            for (const s of sents) {
+                if (gone.has(s)) continue;
+                const body = s.text.trim();
+                if (sents.length > 1 && w.sentence.test(body)) {
+                    edits.push(sentenceEdit(s, { kind: "hurry", part: "wait-beat", label }));
+                    gone.add(s);
+                    continue;
+                }
+                for (const r of w.tail) {
+                    r.lastIndex = 0;
+                    const t = [...s.text.matchAll(r)].find(x => !w.bare.test(x[0]) || w.person.test(body));
+                    if (!t) continue;
+                    edits.push({ start: s.start + t.index, end: s.start + t.index + t[0].length, text: "", kind: "hurry", part: "wait-beat", label });
+                    break;
                 }
             }
         }
