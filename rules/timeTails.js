@@ -5,7 +5,8 @@
 // `minWords` words would be left in the sentence ("Sometime before dinner." stays). The comma
 // before the tail goes with it; the end punctuation stays. Left alone too: a clause whose verb is
 // "be" (the time is what it says: "curfew isn't until ten", "we could be at the station before
-// five"); "will be scrubbing the floor until dawn" is a real verb, so it still goes.
+// five"); "will be scrubbing the floor until dawn" is a real verb, so it still goes. Also left: a
+// negated clause ("doesn't start until nine") and questions ("Can you finish it by Friday?").
 
 import { MARK } from "../core/marks.js";
 
@@ -40,6 +41,16 @@ const TAIL_RE = new RegExp(
 // until ten", "we could be at the station before five"): cutting it leaves "curfew isn't." Not
 // "be" + -ing ("will be standing in the window by Friday"): that's the verb, the time a tail.
 const BE = /(?:\b(?:is|isn['’]t|are|aren['’]t|was|wasn['’]t|were|weren['’]t|am|be|been)\b|\b(?:it|that|this|he|she|there|what|who|where|which)['’]s\b|['’](?:re|m)\b)(?!\s+(?:\p{L}+ly\s+)?\p{L}+ing\b)/iu;
+
+// A negated verb makes the time the point: "doesn't start until nine" means "starts at nine",
+// and cutting it leaves "doesn't start", the opposite.
+const NEGATED = /\b(?:not|never|no longer)\b|n['’]t\b/i;
+
+// In a question the time is usually what's asked ("Can you finish it by Friday?").
+function endsInQuestion(text, from) {
+    const end = text.slice(from).match(/[.!?…~♡\n]/);
+    return end?.[0] === "?";
+}
 
 // The clause before position `at`: back to the last comma, semicolon, dash or sentence start.
 function clauseBefore(text, at) {
@@ -79,7 +90,9 @@ export default {
         const out = text.replace(TAIL_RE, (found, ...rest) => {
             const at = rest[rest.length - 2];
             if (wordsBefore(text, at) < min) return found;
-            if (BE.test(clauseBefore(text, at))) return found;
+            const clause = clauseBefore(text, at);
+            if (BE.test(clause) || NEGATED.test(clause)) return found;
+            if (endsInQuestion(text, at + found.length)) return found;
             hits.push({ before: found.trim().replace(/^,\s*/, ""), after: "" });
             return MARK;
         });
