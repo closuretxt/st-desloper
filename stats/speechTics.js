@@ -1,7 +1,7 @@
 // Speech and gesture tics for the stats (docs/PLAN.md section 7, round 4). PURE: no SillyTavern imports.
 //
 // Counted on the reply as written, whether or not the matching fix is on, so the user can see a
-// tic growing before deciding to cut it (the user: stammers are fine until the model doubles down).
+// tic growing before deciding to cut it (stammers are fine until the model doubles down).
 // Where a fix finds the thing, the fix's own finder counts it, so the stats and the fix agree.
 
 import { runPipeline } from "../core/pipeline.js";

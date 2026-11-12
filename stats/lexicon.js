@@ -51,7 +51,7 @@ export const STOCK_PHRASES = [
     "hung in the air",
     "a dance of",
     "electric",
-    // Added 2026-11-09 from public slop lists (antislop-sampler's phrase list, a SillyTavern
+    // From public slop lists (antislop-sampler's phrase list, a SillyTavern
     // banned-strings preset). Only phrases specific enough not to hit ordinary prose.
     "barely a whisper",
     "shivers up {x} spine",

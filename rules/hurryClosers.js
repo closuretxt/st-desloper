@@ -22,9 +22,9 @@
 //
 // The waiting beat ("wait-beat") is the narration's call to action: the character freezes and
 // hands the turn to the user ("…, looking up at him, waiting." / "She waits for his answer." /
-// "…and looks at him expectantly."). Banned anywhere in narration, not budgeted (the user,
-// 2026-11-11: "that's a call to action"). The tail goes; a sentence that's only the beat goes
-// when the narration keeps another sentence.
+// "…and looks at him expectantly."). Banned anywhere in narration, not budgeted: it's a call
+// to action. The tail goes; a sentence that's only the beat goes when the narration keeps
+// another sentence.
 
 import { sentencesAt, looseOf, LEAD, sentenceEdit, applyEdits, offSet, othersHaveText, persons } from "../core/speech.js";
 
@@ -137,7 +137,7 @@ function matchers(names) {
     const whole = parts => parts.map(p => re(String.raw`${LEAD}${p.replace(/PERSON/g, person)}${voc}[.,!?…~]*$`));
     // "Hurry up and …" counts with whatever follows: at the end of a reply the rest is the
     // over-explained errand ("Hurry up and unlock the door, my keys are on the shelf by the
-    // window!"); a short line before it ("Well?!") already says she wants in (user, 2026-11-09).
+    // window!"); a short line before it ("Well?!") already says she wants in.
     const opener = re(String.raw`${LEAD}${NUDGE}hurry(?: up)?(?: and\b|,\s)`);
     const m = { food: whole(FOOD), waiting: [...whole(WAITING), opener], handover: whole(HANDOVER), dare: whole(DARE), hook: whole(HOOK) };
     if (cache.size > 20) cache.clear();
@@ -233,7 +233,7 @@ export default {
 
         // "Come on, kid. Show me the way!" at the reply's end: the nudge and the order it pushes
         // count as one closer. Unlike the others it goes even as her only line, when the reply
-        // has narration to end on (the user, 2026-11-11: "it's literally come on").
+        // has narration to end on.
         if (speech && atEnd && !gone.size && !off.has("come-on")) {
             const label = ENTRIES.find(e => e.id === "come-on").label;
             for (let c = sents.length - 1; c >= Math.max(0, sents.length - 3); c--) {

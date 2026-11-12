@@ -273,7 +273,7 @@ export function analyze(messages, opts = {}) {
     const lexicon = (Array.isArray(opts.lexicon) && opts.lexicon.length ? opts.lexicon : STOCK_PHRASES)
         .map(compilePhrase)
         .filter(Boolean);
-    // ❌ "User's name in dialogue" was dropped (user, 2026-11-09): in long replies saying the
+    // ❌ "User's name in dialogue" was dropped: in long replies saying the
     // user's name is normal, not a tic. userNames still feed the negation finder.
     const names = [...(opts.charNames || []), ...(opts.userNames || [])].filter(Boolean);
     const negRe = negationRe(names);

@@ -1,6 +1,6 @@
 // Stock gesture budget (docs/PLAN.md section 7, item 13). PURE: no SillyTavern imports.
 //
-// Gestures can be good (the user), so this is a budget, not a ban: the first N stock beats in a
+// Gestures can be good, so this is a budget, not a ban: the first N stock beats in a
 // window of replies stay (default 3 per 10 replies, core/speech.js windowLeft), and never the
 // same one twice in a reply. An extra one is removed only in a shape
 // where the sentence stands without it:

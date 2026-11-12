@@ -1,6 +1,6 @@
 // Stutter budget (docs/PLAN.md section 7, item 12). PURE: no SillyTavern imports.
 //
-// The user likes a stammer now and then, but once the history is full of them the model doubles
+// A stammer now and then is fine, but once the history is full of them the model doubles
 // down. So the first N stammers in a window of replies stay (default 3 per 10 replies; the window
 // is one setting for every budget, core/speech.js windowLeft) and the rest become the plain word:
 //   "I-I don't know. W-what do you mean?"  -> "I-I don't know. What do you mean?"  (1 left)

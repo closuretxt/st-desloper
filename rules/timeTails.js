@@ -1,5 +1,5 @@
 // "…, before dinner." time tails (docs/PLAN.md section 6). PURE: no SillyTavern imports.
-// The finder is the user's own regex (its lookbehinds keep "back before noon", "done before
+// The finder is a hand-written regex (its lookbehinds keep "back before noon", "done before
 // dinner"...), with one addition: a comma that ends the quote also counts as an end, so
 // `"…the report, before dinner," she says.` is caught too. On top of it: skip when fewer than
 // `minWords` words would be left in the sentence ("Sometime before dinner." stays). The comma

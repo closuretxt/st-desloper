@@ -22,7 +22,7 @@ export function nameOf(key) {
 
 // The picker's list: only the open chat's characters (the character, or every group member).
 // No chat open: none, so only the global settings can be edited. Listing every character made
-// the picker unusable with hundreds of them (user). -> [{ key, name, custom }].
+// the picker unusable with hundreds of them. -> [{ key, name, custom }].
 export function characterChoices() {
     const ctx = getContext();
     const s = getSettings();

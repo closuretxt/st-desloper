@@ -19,7 +19,35 @@
 import { MARK } from "../core/marks.js";
 import { dealFrom, choiceList } from "../core/seed.js";
 import { toThird, toPast, conjugateParticiple } from "../lang/conjugate.js";
-import { POSSESSIVE_OF, NOT_PARTICIPLES, IRREGULAR_PAST, COGNITIVE_VERBS, FLIP_TABLE, DELETE_VERBS } from "../lang/words.js";
+import { POSSESSIVE_OF, NOT_PARTICIPLES, IRREGULAR_PAST, COGNITIVE_VERBS, FLIP_TABLE, DELETE_VERBS, LONE_SAME } from "../lang/words.js";
+
+// A lone negation's phrase -> the table key it means, or null. The tables hold one line per
+// meaning; the wording around it varies: "try to move away from him" is "pull away",
+// "make any move to let go of her hand" is "let go". Stripped: the effort words in front, the
+// "from / of + who" tail, emphasis; then other wordings map over (LONE_SAME, lang/words.js).
+const LONE_EFFORT = /^(?:(?:even|really|ever|so\s+much\s+as)\s+)?(?:try|attempt|bother|seem|dare|make\s+(?:any|a|the\s+slightest|the\s+smallest)\s+(?:move|attempt|effort))\s+to\s+/;
+const LONE_SOFT = /^(?:even|really|ever|so\s+much\s+as)\s+/;
+// Only a pronoun: "from the kiss" / "of the sword" names something the flip would lose.
+const LONE_FROM = /\s+(?:from|of)\s+(?:him|her|them|you|me|us|it)$/;
+function loneKey(phrase, has) {
+    let p = phrase.replace(INTENSIFIER, "");
+    const seen = [phrase, p];
+    for (let k = 0; k < 3; k++) {
+        const q = p.replace(LONE_EFFORT, "").replace(LONE_SOFT, "").replace(LONE_FROM, "").replace(INTENSIFIER, "");
+        if (q === p) break;
+        seen.push((p = q));
+    }
+    for (const s of seen) {
+        if (has(s)) return s;
+        // "pull her hand away" -> "pull {pos} hand away", "release him" -> "release {obj}".
+        const shapes = [s, s.replace(/\b(?:his|her|their|my|your|our)\b/, "{pos}"), s.replace(/\b(?:him|her|them|me|you|us)\b/, "{obj}")];
+        for (const shape of shapes) {
+            const same = LONE_SAME[shape];
+            if (same && has(same)) return same;
+        }
+    }
+    return null;
+}
 
 // doesn't -> she presses (third), didn't -> she pressed (past), don't -> they press (base),
 // won't -> null: it often means "refuses", so only rewrites that keep the other half's own verb.
@@ -283,8 +311,25 @@ function negatedEdit(text, m, g, opt) {
     const wholeSentence = (SENTENCE_START.test(before) && /^[A-Z]/.test(subject)) || !!opener;
     if (!wholeSentence && !LEAD_PHRASE.test(before) && !CONTRAST_TAG.test(before)) return null;
     const phrase = clause.trim().toLowerCase().replace(/\s+/g, " ");
-    const key = opt.flips.has(phrase) ? phrase : phrase.replace(INTENSIFIER, "");
-    const flip = opt.flips.get(key);
+    const key = loneKey(phrase, k => opt.flips.has(k));
+    const flip = key && opt.flips.get(key);
+    // "Delete them": every known lone one goes, flips included ("She stays near." reads as badly
+    // as the negation). The whole sentence (with its opener or "For a
+    // moment," lead), or the ", though she doesn't…" tag.
+    if (opt.mode === "delete" && (flip || loneKey(phrase, k => opt.deleteVerbs.has(k)))) {
+        if (wholeSentence) {
+            // The narration's only sentence stays: deleting it would leave nothing there.
+            if (!before.slice(0, before.length - (opener?.[1].length || 0)).replace(/[\s*_(]/g, "") && !text.slice(end + punct.length).replace(/[\s*_)]/g, "")) return null;
+            const edit = cut(subjStart, end + punct.length, MARK, "delete");
+            if (opener) edit.start = edit.hitStart = subjStart - opener[1].length;
+            return edit;
+        }
+        const tag = CONTRAST_TAG.exec(before);
+        if (tag) return { ...cut(subjStart - tag[0].length, end, MARK, "delete"), hitStart: subjStart - tag[0].length };
+        const lead = /[A-Z][a-z]*(?:\s+[a-z]+){0,3},\s+$/.exec(before);
+        if (lead) return { ...cut(subjStart - lead[0].length, end + punct.length, MARK, "delete"), hitStart: subjStart - lead[0].length };
+        return null;
+    }
     if (flip) {
         // Deal from the plain choices, then conjugate, so "she keeps hold … they keep hold" is
         // seen as one repeat (a deck per conjugated list would not). A choice that doesn't fit
@@ -295,7 +340,7 @@ function negatedEdit(text, m, g, opt) {
         if (flipped) return cut(subjEnd, end, `${MARK} ${flipped}`, "flip");
         return null;
     }
-    if (wholeSentence && opt.mode === "flip+delete" && opt.deleteVerbs.has(phrase)) {
+    if (wholeSentence && opt.mode === "flip+delete" && loneKey(phrase, k => opt.deleteVerbs.has(k))) {
         const edit = cut(subjStart, end + punct.length, MARK, "delete");
         if (opener) edit.start = edit.hitStart = subjStart - opener[1].length;
         return edit;
@@ -360,6 +405,7 @@ export default {
             label: 'Lone ones ("She doesn\'t let go.")',
             choices: [
                 ["flip+delete", "Flip, delete filler"],
+                ["delete", "Delete them"],
                 ["flip", "Flip only"],
                 ["leave", "Leave them"],
             ],

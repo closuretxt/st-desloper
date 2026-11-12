@@ -132,7 +132,7 @@ export function isSystemNote(message) {
 // extension, never a reply the model wrote and the user hid later. ST keeps no record of which is
 // which, so: a message seen visible this session, one the model generated (`gen_started`), or one
 // "rewrite saved messages" wrote (it was visible then) is a hidden reply; anything else hidden is
-// a ghost and is left alone completely (user, 2026-11-09).
+// a ghost and is left alone completely.
 const seenVisible = new WeakSet();
 export function isGhost(message) {
     if (!message || message.is_user) return false;

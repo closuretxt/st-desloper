@@ -1,4 +1,4 @@
-// Contractions written out (user request, 2026-11-09). PURE: no SillyTavern imports.
+// Contractions written out. PURE: no SillyTavern imports.
 //
 //   She doesn't look up. -> She does not look up.     It's late. -> It is late.
 //   I'd rather stay.     -> I would rather stay.       She'd gone. -> She had gone.
@@ -6,7 +6,7 @@
 // so a casual character still talks casually. Only forms with one sure reading are written out:
 //   n't      always (doesn't -> does not); "ain't" stays (no single long form)
 //   won't / can't / shan't  only with "hardcore" on (off by default): the long form is another
-//            word, so it changes the voice the most (user, 2026-11-09)
+//            word, so it changes the voice the most
 //   're 'm 'll 've   always, after a pronoun or who / what / there / that
 //   's       after it / he / she / that / there / here / what / who / where / how: "is", or
 //            "has" before been / got / gotten / had. A name's 's stays: possessive or "is"?

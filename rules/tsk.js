@@ -1,4 +1,4 @@
-// "Tsk" -> a sigh (docs/PLAN.md section 6). The user: Tsk becomes a sigh; a tongue click is cringe.
+// "Tsk" -> a sigh (docs/PLAN.md section 6). Tsk becomes a sigh; a tongue click is cringe.
 // PURE: no SillyTavern imports.
 //
 //   As an interjection (opening a sentence, or tagged on after a comma):

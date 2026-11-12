@@ -1,5 +1,5 @@
 // "Deal?" and friends (docs/PLAN.md section 6). PURE: no SillyTavern imports.
-// The user: "Deal is ass overall. Remove it." So the tag goes wherever it stands on its own:
+// "Deal?" is slop wherever it shows up, so the tag goes wherever it stands on its own:
 //   "Ten coins. Deal?"                      -> "Ten coins."
 //   "Ten coins, deal?"                      -> "Ten coins."
 //   "Deal?" she asks, holding out her hand. -> She holds out her hand.   (the repair step)

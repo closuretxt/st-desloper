@@ -1,6 +1,6 @@
 // Tsundere filter (docs/PLAN.md section 7, item 14). PURE: no SillyTavern imports.
 //
-// A tsundere can be a tsundere without the cringe script (the user). So the character stays,
+// A tsundere can be a tsundere without the cringe script. So the character stays,
 // and only the stock beats go, each part with its own switch:
 //   denials:  "It's not like I did it for you or anything! Eat." -> "Eat."
 //             "Don't get the wrong idea!" / "I'm not blushing!" / "Who said I was worried?"
@@ -10,7 +10,7 @@
 //   blushes:  a reply keeps its first blush (setting); later ones go where the sentence stands
 //             without them: "She looks away, her cheeks burning." -> "She looks away."
 // Stammers and huffs have their own budgets (stutter budget, gesture budget).
-// Global on purpose (the user): a tsundere card gets the same treatment, and stays a tsundere.
+// Global on purpose: a tsundere card gets the same treatment, and stays a tsundere.
 
 import { sentencesAt, looseOf, LEAD, sentenceEdit, applyEdits, offSet, persons, earlier, budgetOf, windowLeft, countIn } from "../core/speech.js";
 

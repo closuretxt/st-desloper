@@ -2,7 +2,7 @@
 //
 // The filler beat models lean on most: she keeps her eyes on his face, her gaze stays locked on
 // him, she holds his gaze, she doesn't look away, she studies his face. One now and then is fine;
-// one in every reply is the tic (the user, 2026-11-11). So this is a budget: N stares per window of
+// one in every reply is the tic. So this is a budget: N stares per window of
 // replies (default 1 per 2 replies = never in two replies in a row, core/speech.js windowLeft). An
 // extra one is cut only in a shape where the sentence stands without it:
 //   "She keeps her eyes on his face, watching."  -> removed       (a sentence that's only the stare)

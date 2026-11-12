@@ -118,7 +118,7 @@ export const COGNITIVE_VERBS = new Set([
     "know", "understand", "notice", "realize", "realise", "remember", "mind", "care", "need", "want",
     "think", "believe", "expect", "seem", "like", "recognize", "recognise", "bother", "have", "mean",
     "matter", "dare", "wish", "intend",
-    // "It doesn't register" / "doesn't process what he said": a thought, not an action (2026-11-09).
+    // "It doesn't register" / "doesn't process what he said": a thought, not an action.
     "register", "process", "comprehend", "grasp",
 ]);
 
@@ -137,6 +137,23 @@ export const FLIP_TABLE = [
     "answer = stay quiet | stay silent | say nothing",
     "reply = stay quiet | stay silent | say nothing",
 ];
+
+// Other wordings of a flip-table phrase, so one table line covers the family instead of a line
+// per variant: "She doesn't move away." is "She doesn't pull away.". Looked up after the
+// lone-negation phrase loses its "try to" and "from him" (rules/negationFlip.js `loneKey`).
+export const LONE_SAME = {
+    "move away": "pull away", "back away": "pull away", "draw away": "pull away", "draw back": "pull away",
+    "pull back": "pull away", "shift away": "pull away", "step away": "pull away", "lean away": "pull away",
+    "shrink away": "pull away", "shrink back": "pull away", "jerk away": "pull away", "jerk back": "pull away",
+    "edge away": "pull away", "inch away": "pull away", "recoil": "pull away", "withdraw": "pull away",
+    "flinch away": "flinch", "flinch back": "flinch",
+    "budge": "move", "stir": "move", "move an inch": "move", "move a muscle": "move",
+    "break eye contact": "look away", "glance away": "look away", "turn away": "look away", "avert {pos} eyes": "look away", "avert {pos} gaze": "look away",
+    "release {obj}": "let go", "let {obj} go": "let go", "loosen {pos} grip": "let go",
+    "back down": "step back", "retreat": "step back",
+    "fight it": "resist", "fight {obj}": "resist", "push {obj} away": "resist", "struggle": "resist",
+    "argue": "protest","pull {pos} hand away": "pull away", "pull {pos} hand back": "pull away",
+};
 
 // Verbs that carry no meaning on their own when negated alone ("She doesn't hesitate."): the
 // sentence is deleted.

@@ -46,7 +46,7 @@ const NOTHING_RE = new RegExp(String.raw`\b${BUSY}\s+${SLOT}\s+(?:of|full of)\s+
 
 // "And if you get any in my hair, I'm adding it to your bill." The whole sentence is the quip: an
 // optional "if / when …," then someone adding it to "your" bill, tab or invoice, or "I'll bill you".
-// The user (2026-11-11): unnatural in any scene, a shop included; if they break it, it's obvious
+// Unnatural in any scene, a shop included; if they break it, it's obvious
 // they pay. "Put it on my tab" (a customer ordering) is "my", so it stays.
 const BILL_RE = new RegExp(
     String.raw`^(?:(?:and|but|so|oh|oh,|also|plus)[,]?\s+)*(?:(?:if|when|whatever|anything)\b[^.!?]{1,90}?,\s*)?(?:(?:then|and)\s+)?` +
