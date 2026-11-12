@@ -1,7 +1,11 @@
 // Cleaning while a reply streams in (setting `streamClean`, on by default). ST re-renders the
-// streaming message from its raw text on every tick, writing the message's .mes_text; a
-// MutationObserver on that element runs right after each write, before the browser paints, and
-// puts the cleaned version in its place, so the raw text never shows.
+// streaming message from its raw text on every tick, writing the element its streaming processor
+// holds (`messageTextDom`). That reference is swapped for a detached copy (the shadow): ST writes
+// the raw text there, a MutationObserver on it wakes, and only the cleaned version is written to
+// the element on screen. One write per tick, from the last clean to the next: writing raw then
+// clean into the same element rebuilt every word of a fixed paragraph twice a tick, which
+// restarted their fade-in (flicker). Until ST has picked its element (first token) the observer
+// watches the real element and overwrites ST's raw render, before the browser paints.
 //
 // Only the finished lines are cleaned: everything up to the last line break. The line still being
 // written is shown raw, since a rule could misread half a sentence. Finished lines hit the cache
@@ -20,7 +24,7 @@ import { logDebug } from "../core/debug.js";
 import { liveText, liveState } from "../core/live.js";
 
 let observer = null;
-let watched = null; // { el, id, names, lastUser, history }
+let watched = null; // { el, id, names, lastUser, history, live, sp, shadow, lastHtml }
 let genType = null; // the running generation's type (GENERATION_STARTED)
 
 // Exported for live checks only (CLAUDE.md: test without sending anything).
@@ -28,10 +32,33 @@ export function stopStreamWatch() {
     stop();
 }
 
+function swapped(w) {
+    return !!w?.shadow && w.sp?.messageTextDom === w.shadow;
+}
+
 function stop() {
     observer?.disconnect();
     observer = null;
+    const w = watched;
     watched = null;
+    // Give ST its element back. Cleaning off mid-stream: show what ST last wrote, as written.
+    if (swapped(w)) {
+        w.sp.messageTextDom = w.el;
+        if (!enabled()) w.el.innerHTML = w.shadow.innerHTML;
+    }
+}
+
+// Point ST's streaming processor at the shadow copy, once ST has picked its element.
+function trySwap(w) {
+    if (w.shadow) return;
+    const sp = getContext().streamingProcessor;
+    if (!sp || sp.messageTextDom !== w.el) return;
+    const shadow = w.el.cloneNode(false);
+    shadow.innerHTML = w.el.innerHTML;
+    sp.messageTextDom = shadow;
+    w.sp = sp;
+    w.shadow = shadow;
+    observer?.observe(shadow, { childList: true, subtree: true, characterData: true });
 }
 
 function enabled() {
@@ -65,8 +92,10 @@ function finalTick(ctx) {
 
 function onMutation() {
     try {
-        if (!watched || !enabled()) return;
+        if (!watched) return;
+        if (!enabled()) return stop();
         const ctx = getContext();
+        const shadowMode = swapped(watched);
         const m = ctx.chat?.[watched.id];
         if (!isAiMessage(m) || typeof m.mes !== "string") return;
         // The speaker is read each time: a group reply's `original_avatar` is set as it's made.
@@ -81,15 +110,22 @@ function onMutation() {
         } else {
             shown = liveText(m.mes, clean, watched.live);
         }
-        if (shown === m.mes) return;
+        // Without the shadow, ST already wrote the raw text on screen: nothing to do if it's clean.
+        if (!shadowMode && shown === m.mes) return;
         const html = ctx.messageFormatting(shown, m.name, m.is_system, m.is_user, watched.id, {}, false);
+        // With the shadow, the screen only changes when the clean text does.
+        if (shadowMode && html === watched.lastHtml) return;
+        watched.lastHtml = html;
         if (fadeInOn() && fadeIn) fadeIn(watched.el, html);
         else watched.el.innerHTML = html;
         // Our own write would wake the observer again.
         observer?.takeRecords();
     } catch (e) {
         console.error("[ST Desloper] stream cleaning failed:", e);
+        // Show the text as ST wrote it rather than a stale render.
+        const w = watched;
         stop();
+        if (w?.shadow) w.el.innerHTML = w.shadow.innerHTML;
     }
 }
 
@@ -101,7 +137,7 @@ export function watch() {
     const mes = document.querySelector("#chat .mes.last_mes");
     const el = mes?.querySelector(".mes_text");
     if (!el) return;
-    if (watched?.el === el) return;
+    if (watched?.el === el) return trySwap(watched);
     stop();
     const id = Number(mes.getAttribute("mesid"));
     const chat = getContext().chat || [];
@@ -111,6 +147,7 @@ export function watch() {
     observer = new MutationObserver(onMutation);
     // subtree + characterData: fade-in morphs the text inside the paragraphs, not just them.
     observer.observe(el, { childList: true, subtree: true, characterData: true });
+    trySwap(watched);
     logDebug(`stream: cleaning message ${id} as it streams`);
 }
 

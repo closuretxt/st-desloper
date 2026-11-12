@@ -86,6 +86,45 @@ const wayTail = who =>
     );
 const WAY_TAIL = wayTail(WAY_WHO);
 
+// "she says, not a question" / "It wasn't a question.": the narration explaining its own line.
+// The line already reads as an order or a statement; the note only tells the reader so.
+const NOTQ_NEG = String.raw`(?:(?:it|that|this)(?:\s+(?:is|was)\s+not|\s+(?:isn['’]t|wasn['’]t)|['’]s\s+not)\s+|not\s+)`;
+const NOTQ_DEG = String.raw`(?:(?:really|quite|exactly|even|actually)\s+)?`;
+const NOTQ_KIND = String.raw`(?:a|an)\s+(?:question|request)`;
+// The tail also comes as "it's not a tease this time, just a statement".
+const NOTQ_TAIL_KIND = String.raw`(?:a|an)\s+(?:question|request|tease|joke|threat|challenge|plea|demand|order|command|offer|suggestion|invitation)(?:\s+(?:this|that)\s+time)?`;
+const NOTQ_JUST = String.raw`(?:\s*[,;—–]\s*(?:(?:it['’]s|it\s+(?:is|was))\s+)?(?:just|only|simply|merely|but|more|rather)?\s*(?:a|an)\s+(?:plain\s+|simple\s+|flat\s+)?(?:statement|fact|order|command|observation|question|answer))?`;
+const NOTQ_LESS = String.raw`(?:less|more)\s+(?:of\s+)?(?:an?\s+)?(?:statement|question|order|command|demand)\s+than\s+(?:an?\s+)?(?:question|statement|order|command|demand)`;
+const NOTQ_TAIL = new RegExp(
+    String.raw`(?<=[\p{L}\p{N}'’])\s*,\s*(?:(?:and|but|though|although|even\s+though)\s+)?(?:${NOTQ_NEG}${NOTQ_DEG}${NOTQ_TAIL_KIND}${NOTQ_JUST}|${NOTQ_LESS})(?=\s*[.!;…"”*]|\s*$)`,
+    "giu",
+);
+// The lone sentence. One followed by "It was an order." is a contrast frame (that rule runs first).
+const NOTQ_LONE = new RegExp(
+    String.raw`${SENT_START}(?:(?:It|That|This)(?:\s+(?:is|was)\s+not|\s+(?:isn['’]t|wasn['’]t)|['’]s\s+not)\s+|Not\s+|(?:Wasn['’]t|Isn['’]t)\s+)${NOTQ_DEG}${NOTQ_KIND}\s*[.!]+(?!\s*(?:It|That)(?:\s+(?:was|is)\b|['’]s\b))[ \t]*`,
+    "gu",
+);
+
+// "slow and deliberate": the pair says one thing twice. A tail after a comma goes; elsewhere one
+// plain word from a pool stays.
+const SLOW_TAIL = /(?<=[\p{L}\p{N}'’])\s*,\s*(?:slow(?:ly)?\s+and\s+deliberate(?:ly)?|deliberate(?:ly)?\s+and\s+slow(?:ly)?)(?=\s*[.,;!?…"”*)\]—–]|\s*$)/giu;
+const SLOW_ADV = /\b(?:slowly\s+and\s+deliberately|deliberately\s+and\s+slowly)\b/gi;
+const SLOW_ADJ = /\b(?:(a|an)\s+)?(?:slow(?:\s+and\s+|,\s*)deliberate|deliberate(?:\s+and\s+|,\s*)slow)\b/gi;
+
+// Ambient sound as filler: "The wet sound of her breath fills the quiet office." and the
+// ", mingling with the distant hum of the harbor" tail. Only a sound filling a quiet / silent
+// place (or the silence itself): "The sound of footsteps fills the hallway." can be plot and stays.
+const SOUND_NOUN = "sound|sounds|noise|noises|hum|murmur|buzz|drone|rumble|chatter|thrum|whir|whirr|crackle|patter|ticking|hiss|rustle|rustling";
+const QUIET_ADJ = String.raw`(?:otherwise\s+)?(?:quiet|silent|still|hushed|empty|dim|darkened)`;
+const SOUND_FILLS = new RegExp(
+    String.raw`${SENT_START}(?:The|A)\s+(?:[\p{L}-]+\s+){0,3}?(?:${SOUND_NOUN})\s+of\s+[^.!?…"”*\n]{1,80}?\s+(?:fills|filled|fill|echoes|echoed|echo|cuts\s+through|cut\s+through|breaks|broke)\s+(?:through\s+)?the\s+(?:${QUIET_ADJ}\s+(?:[\p{L}-]+\s+)?[\p{L}-]+|silence|quiet|stillness|hush)\b[^.!?…"”*\n]{0,120}[.!…]+[ \t]*`,
+    "gu",
+);
+const SOUND_MINGLE = new RegExp(
+    String.raw`(?<=[\p{L}\p{N}'’])\s*,\s*(?:mingling|mixing|blending|merging)\s+with\s+(?:the\s+)?(?:(?:distant|faint|far-off|low|soft|steady|quiet|muffled|constant|gentle|rhythmic)\s+)*(?:${SOUND_NOUN})\s+of\s+[^.!?;…"”*\n,]{1,80}(?=\s*[.!;…"”*]|\s*$)`,
+    "giu",
+);
+
 const SHIVER_PRESENT_SG = "runs|races|crawls|creeps|travels|goes|shoots|slides|ripples|snakes|skitters|courses|dances|trickles|rolls";
 const SHIVER_PRESENT_PL = "run|race|crawl|creep|travel|go|shoot|slide|ripple|snake|skitter|course|dance|trickle|roll";
 const SHIVER_PAST = "ran|raced|crawled|crept|traveled|travelled|went|shot|slid|rippled|snaked|skittered|coursed|danced|trickled|rolled";
@@ -689,6 +728,46 @@ export const ENTRIES = [
         example: "He swallows, his Adam's apple bobbing. → He swallows.",
         find(text, g) {
             return [...each(g.adams, text)].map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
+        },
+    },
+    {
+        id: "not-a-question",
+        label: "she says, not a question",
+        example: '"You\'re staying," she says, not a question. → "You\'re staying," she says.  …, and it\'s not a tease this time, just a statement. → removed  "Sit." It wasn\'t a request. → "Sit."',
+        find(text) {
+            const out = [...each(NOTQ_TAIL, text)].map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
+            // wholeLine: a narration bit that is only this note may go when the reply has other text.
+            for (const m of each(NOTQ_LONE, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "", wholeLine: true });
+            return out;
+        },
+    },
+    {
+        id: "slow-deliberate",
+        label: "slow and deliberate",
+        example: "She moves, slow and deliberate. → She moves.  slow and deliberate steps → unhurried steps  He nods slowly and deliberately. → He nods carefully.",
+        pools: {
+            adjective: { label: "Instead of slow and deliberate", value: ["slow", "unhurried", "careful", "steady"] },
+            adverb: { label: "Instead of slowly and deliberately", value: ["slowly", "carefully", "unhurriedly", "without hurry"] },
+        },
+        find(text, g, pickFrom) {
+            const out = [...each(SLOW_TAIL, text)].map(m => ({ start: m.index, end: m.index + m[0].length, text: "" }));
+            for (const m of each(SLOW_ADV, text)) out.push({ start: m.index, end: m.index + m[0].length, text: capLike(pickFrom("adverb", m), m[0]) });
+            for (const m of each(SLOW_ADJ, text)) {
+                const word = pickFrom("adjective", m);
+                const said = m[1] ? `${capLike(article(word), m[1])} ${word}` : capLike(word, m[0]);
+                out.push({ start: m.index, end: m.index + m[0].length, text: said });
+            }
+            return out;
+        },
+    },
+    {
+        id: "sound-fills",
+        label: "the sound of X fills the quiet room",
+        example: "The soft sound of her breathing fills the quiet office. She sits. → She sits.  …, mingling with the distant hum of the harbor. → removed",
+        find(text) {
+            const out = [...each(SOUND_FILLS, text)].map(m => ({ start: m.index, end: m.index + m[0].length, text: "", wholeLine: true }));
+            for (const m of each(SOUND_MINGLE, text)) out.push({ start: m.index, end: m.index + m[0].length, text: "" });
+            return out;
         },
     },
 ];

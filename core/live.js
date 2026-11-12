@@ -28,11 +28,17 @@ export function liveText(text, clean, state = null) {
     if (typeof text !== "string") return text;
     const cut = text.lastIndexOf("\n");
     if (cut <= 0) return text;
-    const done = text.slice(0, cut);
+    // The blank lines after the last finished line stay out of the clean and go back as written:
+    // the pipeline drops trailing line breaks, which turned a paragraph gap into a single break
+    // (a different spacing) whenever the paragraph above had a fix.
+    const whole = text.slice(0, cut);
+    const done = whole.replace(/\s+$/, "");
+    const gap = whole.slice(done.length);
+    if (!done) return text;
     const out = clean(done);
     // Cleaned down to nothing: shown as written, like a finished reply.
     const cleaned = out && out.changed && out.text.trim() ? out.text : done;
-    if (!state) return cleaned === done ? text : cleaned + text.slice(cut);
+    if (!state) return cleaned === done ? text : cleaned + gap + text.slice(cut);
     const lines = cleaned.split("\n");
     // Line i of the clean is line i as written while no rule added or removed a whole line.
     const sameCount = lines.length === done.split("\n").length;
@@ -66,5 +72,5 @@ export function liveText(text, clean, state = null) {
         state.frozen = shown.slice(0, keep + 1);
     }
     const result = shown.join("\n");
-    return result === done ? text : result + text.slice(cut);
+    return result === done ? text : result + gap + text.slice(cut);
 }
