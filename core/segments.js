@@ -1,7 +1,7 @@
 // Splits a message into dialogue and narration, and protects the parts no rule may touch.
 // PURE: no SillyTavern imports. join(split(text)) === text, always.
 //
-// Untouchable parts (code, HTML tags, <details> blocks, {{macros}}, links) are swapped for
+// Untouchable parts (code, HTML tags, <details> blocks, skipped tracker blocks, {{macros}}, links) are swapped for
 // placeholders before any rule runs and swapped back at the end. Placeholders are private-use
 // characters, so no rule's pattern can match inside them, and quote marks inside an HTML
 // attribute can't be mistaken for dialogue.
@@ -13,18 +13,103 @@ const P_MAX = 0xf7ff - P_BASE;
 // Characters this module and core/marks.js use. Text that already has one is left alone.
 const RESERVED = /[-]/;
 
-const PROTECT_RE = new RegExp(
-    [
-        "```[\\s\\S]*?(?:```|$)", // fenced code
-        "<!--[\\s\\S]*?(?:-->|$)", // HTML comments
-        "<(details|style|script|pre|code|textarea|svg)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>", // whole blocks
-        "`[^`\\n]+`", // inline code
-        "\\{\\{[\\s\\S]*?\\}\\}", // macros
-        "<\\/?[A-Za-z][\\w:-]*(?:\\s[^<>]*)?\\/?>", // any other tag (its content stays normal text)
-        "https?:\\/\\/[^\\s<>\"”]+", // links (their dots would split sentences)
-    ].join("|"),
-    "gi",
-);
+// ---- skipped blocks: trackers and status lines no fix may touch -------------------------------
+// Set from the settings (setSkip). A skipped block is protected whole, like <details>, and the
+// stats leave it out, so a tracker's "Partly cloudy, 27°C" in every reply isn't a reused phrase.
+//   tags:     tag names whose whole <tag>…</tag> block is skipped
+//   allTags:  every tag block except the formatting tags below, which often wrap real prose
+//   brackets: [Label: …] blocks ([Time: 12:24], [Status: …]), across lines too
+// An unclosed tag or bracket isn't a block: its text stays normal prose (nothing is lost).
+
+// Tags that wrap the story itself (colored dialogue, emphasis, paragraphs). "Every tag" must not
+// skip these, or a reply styled with <font> or <p> would never be cleaned.
+const FORMAT_TAGS = [
+    "a", "abbr", "b", "big", "blockquote", "br", "center", "cite", "dd", "del", "dfn", "div", "dl",
+    "dt", "em", "font", "h1", "h2", "h3", "h4", "h5", "h6", "hr", "i", "img", "ins", "kbd", "li",
+    "mark", "ol", "p", "q", "s", "samp", "small", "span", "strike", "strong", "sub", "sup", "table",
+    "tbody", "td", "tfoot", "th", "thead", "tr", "tt", "u", "ul", "var", "wbr",
+    // already protected whole by PROTECT_RE's own block list
+    "details", "style", "script", "pre", "code", "textarea", "svg",
+];
+
+const TAG_NAME = /^[A-Za-z][\w:.-]*$/;
+const escRe = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+// "time, <status>, /stats" -> ["time", "status", "stats"]; anything that isn't a tag name dropped.
+export function tagNamesOf(input) {
+    const list = Array.isArray(input) ? input : String(input ?? "").split(/[\s,;]+/);
+    const out = [];
+    for (const raw of list) {
+        const n = String(raw ?? "").replace(/[<>/]/g, "").trim().toLowerCase();
+        if (n && TAG_NAME.test(n) && !out.includes(n)) out.push(n);
+    }
+    return out;
+}
+
+// The skip patterns for one config, as regex sources (empty array: nothing skipped).
+function skipSources(cfg) {
+    const out = [];
+    // The name ends here ("time" must not match <timeline>); a self-closing <time/> opens nothing.
+    const open = "(?=[\\s>/])[^>]*(?<!\\/)>";
+    const body = "[\\s\\S]*?<\\/\\k<sk>\\s*>";
+    if (cfg?.allTags) {
+        const fmt = FORMAT_TAGS.map(escRe).join("|");
+        out.push(`<(?!(?:${fmt})(?![\\w:.-]))(?<sk>[A-Za-z][\\w:.-]*)${open}${body}`);
+    } else {
+        const names = tagNamesOf(cfg?.tags);
+        if (names.length) out.push(`<(?<sk>${names.map(escRe).join("|")})${open}${body}`);
+    }
+    // A short label, a colon, then anything but another bracket (capped, so a stray "[" can't
+    // swallow a whole reply).
+    if (cfg?.brackets) out.push("\\[[A-Za-z][\\w .'’-]{0,40}:[^\\[\\]]{0,2000}\\]");
+    return out;
+}
+
+function buildProtect(skip) {
+    return new RegExp(
+        [
+            "```[\\s\\S]*?(?:```|$)", // fenced code
+            "<!--[\\s\\S]*?(?:-->|$)", // HTML comments
+            "<(details|style|script|pre|code|textarea|svg)\\b[^>]*>[\\s\\S]*?<\\/\\1\\s*>", // whole blocks
+            ...skip, // skipped blocks (trackers), before the single-tag pattern so the whole block goes
+            "`[^`\\n]+`", // inline code
+            "\\{\\{[\\s\\S]*?\\}\\}", // macros
+            "<\\/?[A-Za-z][\\w:-]*(?:\\s[^<>]*)?\\/?>", // any other tag (its content stays normal text)
+            "https?:\\/\\/[^\\s<>\"”]+", // links (their dots would split sentences)
+        ].join("|"),
+        "gi",
+    );
+}
+
+let PROTECT_RE = buildProtect([]);
+let SKIP_RE = null;
+let skipKeyValue = "";
+
+// Called when the settings load or change. Bad input just means nothing is skipped.
+export function setSkip(cfg) {
+    let skip = [];
+    try {
+        skip = skipSources(cfg);
+        PROTECT_RE = buildProtect(skip);
+        SKIP_RE = skip.length ? new RegExp(skip.join("|"), "gi") : null;
+    } catch {
+        skip = [];
+        PROTECT_RE = buildProtect([]);
+        SKIP_RE = null;
+    }
+    skipKeyValue = skip.join("\u0001");
+}
+
+// Changes whenever what's skipped changes: caches keyed on a reply's text add it to their key.
+export function skipKey() {
+    return skipKeyValue;
+}
+
+// The text with skipped blocks taken out (for the stats). Line breaks keep sentences apart.
+export function stripSkipped(text) {
+    const s = String(text ?? "");
+    return SKIP_RE ? s.replace(SKIP_RE, "\n") : s;
+}
 
 const PLACEHOLDER_RE = /([-])/g;
 

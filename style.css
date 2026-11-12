@@ -465,8 +465,101 @@
 }
 
 /* The budget window is the same for everyone. */
-.st-desloper-settings.sd_char_mode .sd_budget_row {
+.st-desloper-settings.sd_char_mode .sd_globals {
     display: none;
+}
+
+/* The fixes tab's global settings: one box, a label column, a soft line between rows. */
+.st-desloper-settings .sd_globals {
+    border-radius: var(--sd-radius);
+    border: 1px solid var(--sd-line-soft);
+    background: var(--sd-glass);
+    margin-bottom: 10px;
+}
+
+.st-desloper-settings .sd_global_row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 40px;
+    padding: 6px 12px;
+}
+
+.st-desloper-settings .sd_global_row + .sd_global_row {
+    border-top: 1px solid var(--sd-line-soft);
+}
+
+.st-desloper-settings .sd_global_label {
+    flex: 0 0 7.5em;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: var(--sd-muted);
+}
+
+.st-desloper-settings .sd_global_body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+}
+
+.st-desloper-settings .sd_global_inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+}
+
+.st-desloper-settings .sd_global_info {
+    margin-left: auto;
+    opacity: 0.4;
+    cursor: help;
+}
+
+.st-desloper-settings .sd_global_info:hover {
+    opacity: 0.85;
+}
+
+/* "Click a fix…" sits on the list it describes, a line under it. */
+.st-desloper-settings .sd_list_head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 16px;
+    padding: 6px 2px 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--sd-line-soft);
+}
+
+.st-desloper-settings .sd_skip_check {
+    margin: 0;
+    white-space: nowrap;
+}
+
+.st-desloper-settings .sd_skip_tags {
+    flex: 1 1 12em;
+    min-width: 9em;
+    margin: 0;
+}
+
+@media (max-width: 600px) {
+    .st-desloper-settings .sd_global_row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+
+    .st-desloper-settings .sd_global_label {
+        flex: none;
+    }
+}
+
+.st-desloper-settings .sd_skip_tags:disabled {
+    opacity: 0.45;
 }
 
 .st-desloper-settings .sd_reset_global {

@@ -9,7 +9,7 @@
 // Everything is measured on the ORIGINAL text (what the model actually wrote), so the numbers show
 // whether cleaning the prompt makes the model write less slop over time.
 
-import { splitSegments } from "../core/segments.js";
+import { splitSegments, stripSkipped } from "../core/segments.js";
 import { COGNITIVE_VERBS } from "../lang/words.js";
 import { STOCK_PHRASES } from "./lexicon.js";
 import { speechTics } from "./speechTics.js";
@@ -295,7 +295,8 @@ export function analyze(messages, opts = {}) {
 }
 
 function analyzeReply(m, lastUser, prev, { lexicon, negRe, clean, names = [] }) {
-    const raw = String(m.text ?? "");
+    // Skipped blocks (trackers, [Time: …]) out first: the same text every reply isn't a reused phrase.
+    const raw = stripSkipped(String(m.text ?? ""));
     const t = norm(raw);
     const ws = wordsOf(t);
     const sents = sentencesOf(t);

@@ -13,7 +13,7 @@
 
 import { MARK } from "./marks.js";
 import { splitSentences } from "./sentences.js";
-import { placeholdersOf, protect, splitSegments } from "./segments.js";
+import { placeholdersOf, protect, skipKey, splitSegments } from "./segments.js";
 
 const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
@@ -164,7 +164,8 @@ export function countIn(raw, type, find) {
 
 const counted = new Map();
 function countOnce(key, raw, countReply) {
-    const k = `${key}\u0001${raw}`;
+    // skipKey: a newly skipped tracker block changes what a reply counts.
+    const k = `${key}\u0001${skipKey()}\u0001${raw}`;
     if (counted.has(k)) return counted.get(k);
     let n = 0;
     try {

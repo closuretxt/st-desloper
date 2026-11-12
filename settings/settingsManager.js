@@ -2,6 +2,7 @@ import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
 import { extensionName } from "../core/constants.js";
 import { logDebug } from "../core/debug.js";
+import { setSkip } from "../core/segments.js";
 
 export const defaultSettings = {
     enabled: true,
@@ -18,6 +19,10 @@ export const defaultSettings = {
     budgetWindow: 10,
     // "Your patterns" (rules/patternRules.js).
     patterns: [],
+    // Blocks no fix touches and the stats leave out: trackers in tags, [Label: …] lines
+    // (core/segments.js setSkip). Global only: a tracker belongs to the chat format, not a character.
+    // On by default: a tracker rewritten or counted as slop is worse than a tag block left as is.
+    skip: { tags: [], allTags: true, brackets: true },
     // Per-character fixes, keyed by avatar file (core/characters.js): only what differs from the above.
     characters: {},
     // The stats' small store (stats/statsStore.js): stock-phrase list, pinned baselines, per-chat summaries.
@@ -57,6 +62,7 @@ export function loadSettings() {
     for (const [key, id] of Object.entries(CHECKBOXES)) {
         $(`#${id}`).prop("checked", !!s[key]);
     }
+    setSkip(s.skip);
 }
 
 export function saveSettings() {
@@ -71,6 +77,8 @@ export function saveSettings() {
 // settings object directly, then call this.
 export function settingsChanged() {
     const s = extension_settings[extensionName];
+    // Before the listeners: they drop caches and re-clean with what's skipped now.
+    setSkip(s.skip);
     saveSettingsDebounced();
     logDebug("settings saved", s);
     for (const fn of changeListeners) {

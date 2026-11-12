@@ -10,8 +10,9 @@ import { initPatternsEditor, setPatternsScope, renderPatterns } from "./patterns
 import { initTester, runTester } from "./tester.js";
 import { characterChoices, getTarget, setTarget, targetKey } from "./characterTarget.js";
 import { LOG_PREFIX } from "../core/constants.js";
-import { getSettings, settingsChanged } from "../settings/settingsManager.js";
+import { defaultSettings, getSettings, settingsChanged } from "../settings/settingsManager.js";
 import { budgetWindow } from "../st/cleaner.js";
+import { tagNamesOf } from "../core/segments.js";
 
 let openPopup = null;
 
@@ -33,20 +34,38 @@ const TEMPLATE = `
     <div class="sd_fx_body">
         <div class="sd_fx_main">
             <section class="sd_pane" data-pane="fixes">
-                <div class="sd_toolbar">
+                <div class="sd_globals">
+                    <div class="sd_global_row sd_budget_row">
+                        <span class="sd_global_label">Budgets</span>
+                        <div class="sd_global_body">
+                            <label class="sd_global_inline" title="Stutter, gesture, one-line paragraph, blush and pet-name budgets count over this many replies. 1 = each reply has its own budget.">
+                                <span>Count over the last</span>
+                                <input type="number" min="1" max="200" class="text_pole sd_number sd_budget_window">
+                                <span>replies</span>
+                            </label>
+                            <i class="fa-solid fa-circle-info sd_global_info" title="A budget of 3 then means 3 in any 10 replies, not 3 in every reply. The tester has no history: there it's per reply."></i>
+                        </div>
+                    </div>
+                    <div class="sd_global_row sd_skip_row">
+                        <span class="sd_global_label">Leave alone</span>
+                        <div class="sd_global_body">
+                            <label class="checkbox_label sd_skip_check" title="Square-bracket lines that start with a label and a colon: [Time: 12:24], [Status: tired], [OOC: …]">
+                                <input type="checkbox" class="sd_skip_brackets"><span>[Label: …]</span>
+                            </label>
+                            <label class="checkbox_label sd_skip_check" title="Every &lt;tag&gt;…&lt;/tag&gt; block, except formatting tags like &lt;font&gt;, &lt;span&gt;, &lt;b&gt;, &lt;i&gt;, &lt;p&gt; that wrap the story itself">
+                                <input type="checkbox" class="sd_skip_all_tags"><span>Every tag block</span>
+                            </label>
+                            <input type="text" class="text_pole sd_skip_tags" placeholder="or tags: time, status" title="Tag names, separated by commas. Their whole &lt;tag&gt;…&lt;/tag&gt; block is left alone.">
+                            <i class="fa-solid fa-circle-info sd_global_info" title="Trackers and status blocks: no fix changes them and the stats leave them out."></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="sd_list_head">
                     <span class="sd_note">Click a fix for its options. <b>Both / Screen / Model</b>: where it applies.</span>
                     <span class="sd_toolbar_end">
                         <button type="button" class="sd_link sd_expand_all">Open all</button>
                         <button type="button" class="sd_link sd_collapse_all">Close all</button>
                     </span>
-                </div>
-                <div class="sd_toolbar sd_budget_row">
-                    <label class="sd_control" title="Stutter, gesture, one-line paragraph, blush and pet-name budgets count over this many replies. 1 = each reply has its own budget.">
-                        <span class="sd_control_label">Budgets count over the last</span>
-                        <input type="number" min="1" max="200" class="text_pole sd_number sd_budget_window">
-                        <span>replies</span>
-                    </label>
-                    <span class="sd_note">A budget of 3 then means 3 in any 10 replies, not 3 in every reply. The tester has no history: there it's per reply.</span>
                 </div>
                 <div class="sd_card_list sd_rule_list"></div>
             </section>
@@ -116,6 +135,32 @@ function showScope($root) {
         .text(t ? `Only ${t.name}'s replies. Untouched settings follow the global ones; ↺ on a fix puts it back.` : "Changes save as you go and apply to every chat.");
 }
 
+// "Leave alone": blocks no fix touches (core/segments.js setSkip). Global only, so the row hides
+// while a character is picked. With "Every tag block" on, the tag list has nothing to add.
+function initSkipRow($root) {
+    const s = getSettings();
+    s.skip = { ...defaultSettings.skip, ...(s.skip || {}) };
+    const $br = $root.find(".sd_skip_brackets").prop("checked", !!s.skip.brackets);
+    const $all = $root.find(".sd_skip_all_tags").prop("checked", !!s.skip.allTags);
+    const $tags = $root.find(".sd_skip_tags").val(tagNamesOf(s.skip.tags).join(", "));
+    const sync = () => $tags.prop("disabled", !!s.skip.allTags);
+    sync();
+    $br.on("change", () => {
+        s.skip.brackets = $br.prop("checked");
+        settingsChanged();
+    });
+    $all.on("change", () => {
+        s.skip.allTags = $all.prop("checked");
+        sync();
+        settingsChanged();
+    });
+    $tags.on("change", () => {
+        s.skip.tags = tagNamesOf($tags.val());
+        $tags.val(s.skip.tags.join(", "));
+        settingsChanged();
+    });
+}
+
 // tab: "fixes" | "patterns" | "tester".
 export async function openFixes(tab = "fixes") {
     if (openPopup) return;
@@ -159,6 +204,7 @@ export async function openFixes(tab = "fixes") {
         $win.val(getSettings().budgetWindow);
         settingsChanged();
     });
+    initSkipRow($root);
     $root.on("click", ".sd_expand_all", () => setAllCardsOpen($rules, true));
     $root.on("click", ".sd_collapse_all", () => setAllCardsOpen($rules, false));
     showTab($root, tab);
