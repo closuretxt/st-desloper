@@ -1,20 +1,31 @@
 // "Rewrite saved messages" mode, the data side (st/rewrite.js runs it). The cleaned text goes into
 // the saved `mes`, so every extension that reads the chat (TTS, summaries, memory) gets it too, and
-// the original is kept beside it in `extra.st_desloper = { original, cleaned }` so it can be put
+// the original is kept beside it in `extra.st_deslopper = { original, cleaned }` so it can be put
 // back. `extra` is where ST keeps per-swipe data: it copies it into `swipe_info[k].extra` and back
 // on every swipe, so each swipe carries its own record.
 //
+// Chats saved before the spelling fix hold the record under `extra.st_desloper`: it's still read,
+// and replaced by the new key the next time the message is written or restored.
+//
 // Pure: no SillyTavern imports, tested by .tests/run.mjs.
 
-export const RECORD_KEY = "st_desloper";
+export const RECORD_KEY = "st_deslopper";
+const OLD_RECORD_KEY = "st_desloper";
 
 function recordOf(extra) {
-    const rec = extra && typeof extra === "object" ? extra[RECORD_KEY] : null;
+    if (!extra || typeof extra !== "object") return null;
+    const rec = extra[RECORD_KEY] ?? extra[OLD_RECORD_KEY];
     return rec && typeof rec.original === "string" && typeof rec.cleaned === "string" ? rec : null;
 }
 
+function dropRecord(extra) {
+    if (!extra || typeof extra !== "object") return;
+    delete extra[RECORD_KEY];
+    delete extra[OLD_RECORD_KEY];
+}
+
 // The text as the model wrote it, from a saved text and its record. If the text no longer
-// matches what Desloper wrote, someone changed it since: a "continue" glued more text on (kept,
+// matches what Deslopper wrote, someone changed it since: a "continue" glued more text on (kept,
 // on top of the original), or the user or another extension edited it (their text wins and
 // becomes the new original).
 function originalOf(text, extra) {
@@ -46,9 +57,10 @@ function syncSwipe(message, before) {
     const rec = recordOf(message.extra);
     if (rec) {
         if (!info.extra || typeof info.extra !== "object") info.extra = {};
+        dropRecord(info.extra);
         info.extra[RECORD_KEY] = { original: rec.original, cleaned: rec.cleaned };
-    } else if (info.extra && typeof info.extra === "object") {
-        delete info.extra[RECORD_KEY];
+    } else {
+        dropRecord(info.extra);
     }
 }
 
@@ -58,13 +70,15 @@ function syncSwipe(message, before) {
 export function writeCleaned(message, source, cleaned) {
     const before = message.mes;
     const hadRec = recordOf(message.extra);
+    const oldKey = !!message.extra?.[OLD_RECORD_KEY];
     if (cleaned == null || cleaned === source) {
         if (!hadRec && before === source) return { mes: false, data: false };
-        if (message.extra && typeof message.extra === "object") delete message.extra[RECORD_KEY];
+        dropRecord(message.extra);
         message.mes = source;
     } else {
-        if (hadRec && hadRec.original === source && hadRec.cleaned === cleaned && before === cleaned) return { mes: false, data: false };
+        if (!oldKey && hadRec && hadRec.original === source && hadRec.cleaned === cleaned && before === cleaned) return { mes: false, data: false };
         if (!message.extra || typeof message.extra !== "object") message.extra = {};
+        dropRecord(message.extra);
         message.extra[RECORD_KEY] = { original: source, cleaned };
         message.mes = cleaned;
     }
@@ -79,7 +93,7 @@ export function restoreMessage(message) {
     if (recordOf(message.extra)) {
         const before = message.mes;
         message.mes = originalText(message);
-        delete message.extra[RECORD_KEY];
+        dropRecord(message.extra);
         syncSwipe(message, before);
         changed = true;
     }
@@ -87,7 +101,7 @@ export function restoreMessage(message) {
         message.swipe_info.forEach((info, k) => {
             if (!recordOf(info?.extra)) return;
             if (Array.isArray(message.swipes) && typeof message.swipes[k] === "string") message.swipes[k] = originalOf(message.swipes[k], info.extra);
-            delete info.extra[RECORD_KEY];
+            dropRecord(info.extra);
             changed = true;
         });
     }

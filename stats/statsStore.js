@@ -1,7 +1,7 @@
 // The little the stats keep, all in extension_settings (nothing per chat file: every number is
 // recomputed from the saved originals, which never change):
 //   lexicon    the user's stock-phrase list, or null for the built-in one (stats/lexicon.js)
-//   pins       chatId -> { from, to }: a pinned baseline ("before I installed Desloper")
+//   pins       chatId -> { from, to }: a pinned baseline ("before I installed Deslopper")
 //   summaries  the latest numbers of each chat the stats were opened for (newest first, max 50)
 // Saved with saveSettingsDebounced directly, not settingsChanged(): none of this changes what
 // gets cleaned, so the display doesn't need to refresh.

@@ -287,7 +287,7 @@ export function setAllCardsOpen($box, open) {
 
 // The drawer's quick grid: one switch per fix, plus a small icon when a fix only works on one side.
 export function renderQuickRules() {
-    const $box = $("#st_desloper_quick");
+    const $box = $("#st_deslopper_quick");
     if (!$box.length) return;
     $box.empty();
     let on = 0;
@@ -306,5 +306,5 @@ export function renderQuickRules() {
         if (icon) $chip.append($(`<i class="fa-solid ${icon} sd_chip_where">`).attr("title", WHERE_CHOICES.find(c => c[0] === values.where)?.[2] || ""));
         $box.append($chip);
     }
-    $("#st_desloper_fix_count").text(`${on} of ${BUILTIN_RULES.length} on`);
+    $("#st_deslopper_fix_count").text(`${on} of ${BUILTIN_RULES.length} on`);
 }

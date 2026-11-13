@@ -1,6 +1,6 @@
 import { extension_settings } from "../../../../extensions.js";
 import { saveSettingsDebounced } from "../../../../../script.js";
-import { extensionName } from "../core/constants.js";
+import { extensionName, OLD_EXTENSION_NAME } from "../core/constants.js";
 import { logDebug } from "../core/debug.js";
 import { setSkip } from "../core/segments.js";
 
@@ -32,10 +32,10 @@ export const defaultSettings = {
 // Checkbox wiring: setting key -> element id in index.html. Load, save and listeners all
 // iterate this table, so a new toggle is one line here.
 const CHECKBOXES = {
-    enabled: "st_desloper_setting_enabled",
-    debug_mode: "st_desloper_setting_debug_mode",
-    rewriteSaved: "st_desloper_setting_rewrite_saved",
-    streamClean: "st_desloper_setting_stream_clean",
+    enabled: "st_deslopper_setting_enabled",
+    debug_mode: "st_deslopper_setting_debug_mode",
+    rewriteSaved: "st_deslopper_setting_rewrite_saved",
+    streamClean: "st_deslopper_setting_stream_clean",
 };
 
 // Called after a save so display and prompt can recompute (wired in later steps).
@@ -49,6 +49,12 @@ export function getSettings() {
 }
 
 export function loadSettings() {
+    // Settings saved under the old spelling are copied to the new key once. The old entry stays as
+    // it was, a backup an older version can still load; a copy, not the same object, so it doesn't
+    // keep changing along with the new one.
+    if (!extension_settings[extensionName] && extension_settings[OLD_EXTENSION_NAME]) {
+        extension_settings[extensionName] = structuredClone(extension_settings[OLD_EXTENSION_NAME]);
+    }
     extension_settings[extensionName] = extension_settings[extensionName] || {};
     const s = extension_settings[extensionName];
 
@@ -86,12 +92,12 @@ export function settingsChanged() {
         try {
             fn(s);
         } catch (e) {
-            console.error("[ST Desloper] settings listener failed:", e);
+            console.error("[ST Deslopper] settings listener failed:", e);
         }
     }
 }
 
 export function initSettingsListeners() {
     const ids = Object.values(CHECKBOXES);
-    $(ids.map(id => `#${id}`).join(", ")).off("change.st_desloper").on("change.st_desloper", saveSettings);
+    $(ids.map(id => `#${id}`).join(", ")).off("change.st_deslopper").on("change.st_deslopper", saveSettings);
 }

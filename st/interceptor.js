@@ -9,7 +9,7 @@ import { cleanText, isAiMessage, chatNames, lastUserBefore, historyBefore, origi
 import { logDebug } from "../core/debug.js";
 
 export function initInterceptor() {
-    globalThis.st_desloper_intercept = async function (chat, _contextSize, _abort, type) {
+    globalThis.st_deslopper_intercept = async function (chat, _contextSize, _abort, type) {
         try {
             if (!getSettings()?.enabled || !Array.isArray(chat)) return;
             const started = performance.now();
@@ -52,8 +52,8 @@ export function initInterceptor() {
             }
             logDebug(`prompt (${type || "normal"}): cleaned ${changed} of ${chat.length} messages, ${hits} fixes (${Math.round(performance.now() - started)} ms)`);
         } catch (e) {
-            // A Desloper bug must never block a generation.
-            console.error("[ST Desloper] interceptor failed:", e);
+            // A Deslopper bug must never block a generation.
+            console.error("[ST Deslopper] interceptor failed:", e);
         }
     };
 }

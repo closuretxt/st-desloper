@@ -1,4 +1,4 @@
-# ST Desloper
+# ST Deslopper
 
 A SillyTavern extension that cleans the stock phrases and habits out of AI replies: "It wasn't
 anger. It was something softer.", em dashes everywhere, the same gesture three replies in a row,
@@ -22,9 +22,9 @@ If you want other extensions (TTS, summaries, memory) to get the cleaned text as
 **Rewrite saved messages**. The original is kept in the chat file and put back if you turn it off.
 
 > **Before uninstalling with Rewrite saved messages on:** turn it off first, then open each chat
-> you used it in. The originals are put back only when a chat is opened with Desloper installed;
+> you used it in. The originals are put back only when a chat is opened with Deslopper installed;
 > a chat you never reopen keeps the cleaned text (its original stays in the file, under
-> `extra.st_desloper`).
+> `extra.st_deslopper`).
 
 ## Install
 
@@ -34,7 +34,7 @@ Extensions panel.
 
 ## Using it
 
-Open the **ST Desloper** drawer in the Extensions panel.
+Open the **ST Deslopper** drawer in the Extensions panel.
 
 - **Enabled** turns everything on or off.
 - **Show originals** shows each reply as written, with removed text in red and added text in green.
@@ -44,7 +44,7 @@ Open the **ST Desloper** drawer in the Extensions panel.
   ones you want. This is also where you add your own patterns.
 - **Tester** lets you paste a reply and see the cleaned version without touching the chat.
 - **Open stats** shows how often the current chat's replies use each kind of slop, and whether it's
-  getting better. Also available as `/desloper-stats`.
+  getting better. Also available as `/deslopper-stats`.
 
 ## When a fix gets it wrong
 
@@ -52,7 +52,7 @@ Fixes are written to leave text alone when they aren't sure, but they will miss 
 **Show originals** to see what changed, then turn off or adjust that fix in **Fixes and options**.
 
 Found a misfire or a new pattern worth fixing? Open an issue on this repository with a short
-example (made-up text of the same shape is fine) or report it in the ST Discord thread for ST Desloper.
+example (made-up text of the same shape is fine) or report it in the ST Discord thread for ST Deslopper.
 
 ## Your own patterns
 

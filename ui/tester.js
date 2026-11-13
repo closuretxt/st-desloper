@@ -66,7 +66,7 @@ function safeRun() {
     try {
         runTester();
     } catch (e) {
-        console.error("[ST Desloper] tester failed:", e);
+        console.error("[ST Deslopper] tester failed:", e);
     }
 }
 

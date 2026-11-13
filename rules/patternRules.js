@@ -188,7 +188,7 @@ export function blankPattern() {
     };
 }
 
-// Import: SillyTavern Regex extension scripts (one object or a list), or Desloper's own export.
+// Import: SillyTavern Regex extension scripts (one object or a list), or Deslopper's own export.
 // Only scripts that run on AI output (placement 2) are taken. -> { patterns, skipped }.
 export function importPatterns(json) {
     const list = Array.isArray(json) ? json : Array.isArray(json?.patterns) ? json.patterns : [json];
@@ -237,7 +237,7 @@ export function importPatterns(json) {
 
 export function exportPatterns(patterns) {
     return {
-        type: "st-desloper-patterns",
+        type: "st-deslopper-patterns",
         version: 1,
         patterns: (patterns || []).map(({ name, find, replace, scope, where, enabled, checks }) => ({ name, find, replace, scope, where, enabled, checks })),
     };

@@ -1,31 +1,31 @@
 <!-- Settings drawer, appended to #extensions_settings. Kept short on purpose: the fixes, your
      patterns and the tester live in a popup (ui/fixesPopup.js), the stats in theirs. -->
-<div id="st_desloper_settings_block" class="st-desloper-settings">
+<div id="st_deslopper_settings_block" class="st-deslopper-settings">
     <div class="inline-drawer">
         <div class="inline-drawer-toggle inline-drawer-header">
-            <b>🐴 ST Desloper</b>
+            <b>🐴 ST Deslopper</b>
             <div class="inline-drawer-icon fa-solid fa-circle-chevron-down down"></div>
         </div>
         <div class="inline-drawer-content sd_drawer">
             <div class="sd_master">
-                <label class="sd_switch_label sd_master_main" for="st_desloper_setting_enabled" title="Master switch: off shows and sends every reply exactly as written.">
-                    <input id="st_desloper_setting_enabled" type="checkbox" class="sd_switch" />
+                <label class="sd_switch_label sd_master_main" for="st_deslopper_setting_enabled" title="Master switch: off shows and sends every reply exactly as written.">
+                    <input id="st_deslopper_setting_enabled" type="checkbox" class="sd_switch" />
                     <span>Enabled</span>
                 </label>
-                <label class="sd_switch_label" for="st_desloper_show_originals" title="Show every reply as written, with Desloper's changes marked: removed text struck in red, added text in green (also in rewrite mode, from the kept original). Only the screen: what's sent to the model is still cleaned. Not saved: it's off again after a reload.">
-                    <input id="st_desloper_show_originals" type="checkbox" class="sd_switch" />
+                <label class="sd_switch_label" for="st_deslopper_show_originals" title="Show every reply as written, with Deslopper's changes marked: removed text struck in red, added text in green (also in rewrite mode, from the kept original). Only the screen: what's sent to the model is still cleaned. Not saved: it's off again after a reload.">
+                    <input id="st_deslopper_show_originals" type="checkbox" class="sd_switch" />
                     <span>Show originals</span>
                 </label>
-                <label class="sd_switch_label" for="st_desloper_setting_stream_clean" title="Clean a reply while it streams in: finished lines show clean right away, the line being written shows as it comes. Off when SillyTavern's stream fade-in is on.">
-                    <input id="st_desloper_setting_stream_clean" type="checkbox" class="sd_switch" />
+                <label class="sd_switch_label" for="st_deslopper_setting_stream_clean" title="Clean a reply while it streams in: finished lines show clean right away, the line being written shows as it comes. Off when SillyTavern's stream fade-in is on.">
+                    <input id="st_deslopper_setting_stream_clean" type="checkbox" class="sd_switch" />
                     <span>Clean while streaming</span>
                 </label>
-                <label class="sd_switch_label" for="st_desloper_setting_rewrite_saved" title="Write the cleaned text into the saved messages, so other extensions (TTS, summaries, memory) get it too and Edit shows it. The original is kept in the chat file: turning this (or Desloper) off puts it back, in the open chat at once and in other chats when you next open them. What's sent to the model is the same either way.">
-                    <input id="st_desloper_setting_rewrite_saved" type="checkbox" class="sd_switch" />
+                <label class="sd_switch_label" for="st_deslopper_setting_rewrite_saved" title="Write the cleaned text into the saved messages, so other extensions (TTS, summaries, memory) get it too and Edit shows it. The original is kept in the chat file: turning this (or Deslopper) off puts it back, in the open chat at once and in other chats when you next open them. What's sent to the model is the same either way.">
+                    <input id="st_deslopper_setting_rewrite_saved" type="checkbox" class="sd_switch" />
                     <span>Rewrite saved messages</span>
                 </label>
-                <label class="sd_switch_label" for="st_desloper_setting_debug_mode" title="Log what Desloper does to the browser console.">
-                    <input id="st_desloper_setting_debug_mode" type="checkbox" class="sd_switch" />
+                <label class="sd_switch_label" for="st_deslopper_setting_debug_mode" title="Log what Deslopper does to the browser console.">
+                    <input id="st_deslopper_setting_debug_mode" type="checkbox" class="sd_switch" />
                     <span>Debug log</span>
                 </label>
             </div>
@@ -34,15 +34,15 @@
             <div class="sd_section">
                 <div class="sd_section_head">
                     <span class="sd_section_title"><i class="fa-solid fa-wand-magic-sparkles"></i>Fixes</span>
-                    <span id="st_desloper_fix_count" class="sd_badge"></span>
+                    <span id="st_deslopper_fix_count" class="sd_badge"></span>
                 </div>
-                <div id="st_desloper_quick" class="sd_quick"></div>
-                <div id="st_desloper_patterns_summary" class="sd_quick_patterns" title="Open Your patterns"></div>
+                <div id="st_deslopper_quick" class="sd_quick"></div>
+                <div id="st_deslopper_patterns_summary" class="sd_quick_patterns" title="Open Your patterns"></div>
                 <div class="sd_buttons">
-                    <div id="st_desloper_fixes_open" class="menu_button sd_button_main" title="Every fix with its options, your own patterns and the tester">
+                    <div id="st_deslopper_fixes_open" class="menu_button sd_button_main" title="Every fix with its options, your own patterns and the tester">
                         <i class="fa-solid fa-sliders"></i><span>Fixes and options</span>
                     </div>
-                    <div id="st_desloper_tester_open" class="menu_button" title="Paste a reply and see what Desloper makes of it">
+                    <div id="st_deslopper_tester_open" class="menu_button" title="Paste a reply and see what Deslopper makes of it">
                         <i class="fa-solid fa-flask"></i><span>Tester</span>
                     </div>
                 </div>
@@ -51,13 +51,13 @@
             <div class="sd_section">
                 <div class="sd_section_head">
                     <span class="sd_section_title"><i class="fa-solid fa-chart-simple"></i>Stats</span>
-                    <span id="st_desloper_stats_last" class="sd_badge" hidden></span>
+                    <span id="st_deslopper_stats_last" class="sd_badge" hidden></span>
                 </div>
                 <div class="sd_stats_row">
-                    <div id="st_desloper_stats_open" class="menu_button sd_button_main" title="How sloppy the open chat's replies are, as the model wrote them, and whether it's getting better">
+                    <div id="st_deslopper_stats_open" class="menu_button sd_button_main" title="How sloppy the open chat's replies are, as the model wrote them, and whether it's getting better">
                         <i class="fa-solid fa-chart-simple"></i><span>Open stats</span>
                     </div>
-                    <span class="sd_note">Also in the wand menu and as /desloper-stats.</span>
+                    <span class="sd_note">Also in the wand menu and as /deslopper-stats.</span>
                 </div>
             </div>
         </div>

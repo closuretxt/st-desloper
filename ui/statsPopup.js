@@ -26,21 +26,21 @@ const BASELINES = [
 ];
 const STATUS_WORDS = { worse: "worse", better: "better", moved: "moved", steady: "", new: "" };
 // Two views of the same chat: the replies as the model wrote them (what the prompt-cleaning is
-// meant to improve over time), and the replies as Desloper shows them (what the user reads).
+// meant to improve over time), and the replies as Deslopper shows them (what the user reads).
 const MODES = {
     written: {
         tab: "As written",
         icon: "fa-pen-nib",
-        hint: "The replies exactly as the model wrote them, before Desloper touches them",
-        line: "Measured on the replies as the model wrote them, before Desloper. Desloper's fixes show what it would change.",
-        textHeader: "Measured on: the replies as the model wrote them (before Desloper)",
+        hint: "The replies exactly as the model wrote them, before Deslopper touches them",
+        line: "Measured on the replies as the model wrote them, before Deslopper. Deslopper's fixes show what it would change.",
+        textHeader: "Measured on: the replies as the model wrote them (before Deslopper)",
     },
     after: {
-        tab: "After Desloper",
+        tab: "After Deslopper",
         icon: "fa-wand-magic-sparkles",
-        hint: "The replies as Desloper shows them in the chat: what you read",
-        line: "Measured on the replies as Desloper shows them in the chat (only the rules set to clean the display). This is what you read.",
-        textHeader: "Measured on: the replies as Desloper shows them in the chat (after Desloper, display rules only)",
+        hint: "The replies as Deslopper shows them in the chat: what you read",
+        line: "Measured on the replies as Deslopper shows them in the chat (only the rules set to clean the display). This is what you read.",
+        textHeader: "Measured on: the replies as Deslopper shows them in the chat (after Deslopper, display rules only)",
     },
 };
 
@@ -218,7 +218,7 @@ function reportHtml(rep, ctx) {
         parts.push(
             card(
                 "fa-ban",
-                "Negated actions Desloper left alone",
+                "Negated actions Deslopper left alone",
                 `<div class="sd_note">The most common ones are worth a line in Fixes → Negated actions → Flips (or the delete list).</div>
                 <ul class="sd_examples">${rep.leftovers
                     .map(l => `<li><b>"doesn't ${esc(l.phrase)}"</b> <span class="sd_badge">×${l.count}</span><ul class="sd_examples">${l.examples.map(exampleHtml).join("")}</ul></li>`)
@@ -239,7 +239,7 @@ function reportText(rep, ctx) {
         e.before !== undefined
             ? `    #${e.index} ${clip(e.before, 160)} → ${e.after?.trim() ? clip(e.after, 160) : "(removed)"}`
             : `    #${e.index} ${clip(e.quote, 220)}${e.note ? ` (${e.note})` : ""}${e.score !== undefined ? ` [${e.score}]` : ""}`;
-    lines.push(`Desloper stats: ${ctx.title}`);
+    lines.push(`Deslopper stats: ${ctx.title}`);
     lines.push(MODES[ctx.mode]?.textHeader || "");
     if (ctx.modeNote) lines.push(ctx.modeNote);
     lines.push(`${ctx.windowLabel}; ${rep.n} replies measured${rep.hasBaseline ? `, compared with ${rep.baseN} replies` : ""}.`);
@@ -277,7 +277,7 @@ function reportText(rep, ctx) {
         }
     }
     if (rep.leftovers.length) {
-        lines.push("", "Negated actions Desloper left alone");
+        lines.push("", "Negated actions Deslopper left alone");
         for (const l of rep.leftovers) {
             lines.push(`  "doesn't ${l.phrase}" ×${l.count}`);
             for (const e of l.examples) lines.push(exampleLine(e));
@@ -409,15 +409,15 @@ export async function openStats() {
     const ctx = getContext();
     const chat = ctx.chat || [];
     if (!chat.length) {
-        toastr.info("Open a chat first.", "Desloper stats");
+        toastr.info("Open a chat first.", "Deslopper stats");
         return;
     }
     const chatId = ctx.getCurrentChatId?.() || null;
     const title = ctx.groupId ? ctx.groups?.find(g => g.id == ctx.groupId)?.name || "Group chat" : ctx.name2 || "Chat";
 
-    const root = $(`<div class="sd_popup sd_stats st-desloper-settings">
+    const root = $(`<div class="sd_popup sd_stats st-deslopper-settings">
         <div class="sd_popup_title">
-            <span class="sd_popup_name">📊 Desloper stats</span>
+            <span class="sd_popup_name">📊 Deslopper stats</span>
         </div>
         <div class="sd_tabs sd_stats_tabs" role="tablist">${Object.entries(MODES)
             .map(([k, m]) => `<button type="button" class="sd_tab${k === "written" ? " sd_active" : ""}" data-mode="${k}" title="${esc(m.hint)}"><i class="fa-solid ${m.icon}"></i><span>${esc(m.tab)}</span></button>`)
@@ -464,7 +464,7 @@ export async function openStats() {
         const size = budgetWindow();
         const seen = [];
         // The text the chat shows for each reply (st/display.js refreshMessage), collected in the
-        // same pass so the "After Desloper" tab never cleans the chat a second time. When every
+        // same pass so the "After Deslopper" tab never cleans the chat a second time. When every
         // enabled rule also cleans the display (the usual case), it's this pass's own result;
         // only rules set to "outgoing only" make a second, display-only run needed.
         const on = !!s?.enabled;
@@ -490,12 +490,12 @@ export async function openStats() {
     let shownText = new Map();
     const analyzeOpts = () => ({ userNames: ctx.name1 ? [ctx.name1] : [], charNames: names.filter(n => n !== ctx.name1), lexicon: getLexicon() });
     // The replies as the chat shows them. No clean step: the fixes are already in, so what's
-    // counted is the slop Desloper left.
+    // counted is the slop Deslopper left.
     const measureAfter = () => {
         const started = performance.now();
         const shown = messages.map(m => (!m.isUser && shownText.has(m.index) ? { ...m, text: shownText.get(m.index) } : m));
         records.after = analyze(shown, analyzeOpts());
-        logDebug(`stats (after Desloper): ${records.after.length} replies measured (${Math.round(performance.now() - started)} ms)`);
+        logDebug(`stats (after Deslopper): ${records.after.length} replies measured (${Math.round(performance.now() - started)} ms)`);
     };
     try {
         measure();
@@ -526,7 +526,7 @@ export async function openStats() {
             const winKey = String(root.find(".sd_win").val());
             const p = positions(recs, winKey, baseKey, getPin(chatId));
             const rep = buildReport(recs, { window: p.window, baseline: p.baseline, ruleIds: mode === "after" ? [] : ruleIds, ruleNames });
-            const modeNote = mode === "after" && !getSettings()?.enabled ? "Desloper is switched off, so the chat shows the replies as written." : "";
+            const modeNote = mode === "after" && !getSettings()?.enabled ? "Deslopper is switched off, so the chat shows the replies as written." : "";
             root.find(".sd_stats_body").html(reportHtml(rep, { title, baselineNote: p.note, mode, modeNote }));
             lastText = reportText(rep, { title, mode, modeNote, windowLabel: WINDOWS.find(([v]) => v === winKey)?.[1] || winKey });
             // The all-chats list keeps each chat's whole-chat score as written, so the numbers compare.
@@ -564,8 +564,8 @@ export async function openStats() {
     root.on("click", ".sd_copy_report", async () => {
         try {
             if (!lastText) return;
-            if (await copyText(lastText)) toastr.success("Report copied.", "Desloper stats");
-            else toastr.warning("Couldn't reach the clipboard.", "Desloper stats");
+            if (await copyText(lastText)) toastr.success("Report copied.", "Deslopper stats");
+            else toastr.warning("Couldn't reach the clipboard.", "Deslopper stats");
         } catch (err) {
             console.error(`${LOG_PREFIX} copy failed:`, err);
         }

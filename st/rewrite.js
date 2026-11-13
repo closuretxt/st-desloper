@@ -39,7 +39,7 @@ export function saveSoon() {
             await now.saveChat?.();
             logDebug("rewrite: chat saved");
         } catch (e) {
-            console.error("[ST Desloper] saving the chat failed:", e);
+            console.error("[ST Deslopper] saving the chat failed:", e);
         }
     }, 500);
 }
@@ -68,7 +68,7 @@ export async function syncChat() {
                 if (r.mes) changed.add(i);
                 data ||= r.data;
             } catch (e) {
-                console.error(`[ST Desloper] rewrite of message ${i} failed:`, e);
+                console.error(`[ST Deslopper] rewrite of message ${i} failed:`, e);
             }
             if (performance.now() - slice > 12) {
                 await yieldToBrowser();

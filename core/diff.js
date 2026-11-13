@@ -1,5 +1,5 @@
 // "Show original" with the changes marked: a word-level diff between what the model wrote and
-// what Desloper shows, as the original text with markers around removed and added bits.
+// what Deslopper shows, as the original text with markers around removed and added bits.
 //
 // The markers are private-use characters, not HTML: ST runs display text through regex scripts,
 // markdown, quote colouring, "encode tags" and a sanitizer, and plain characters pass all of them
@@ -23,7 +23,7 @@ function tokenize(text) {
     return text.match(TOKEN) || [];
 }
 
-// Myers' diff (O((N+M)·D), D = number of edits): Desloper changes a few spots in a long reply,
+// Myers' diff (O((N+M)·D), D = number of edits): Deslopper changes a few spots in a long reply,
 // so this stays quick where a full table would not. Returns [op, token] pairs in order
 // ("=" same, "-" removed, "+" added), or null past `maxEdits` (a near-total rewrite isn't worth marking).
 export function diffTokens(a, b, maxEdits = 1500) {

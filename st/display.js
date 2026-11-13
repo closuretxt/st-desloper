@@ -3,10 +3,10 @@
 //
 // The cleaned text lives only in memory. display_text is set as a non-enumerable property, so
 // JSON.stringify (ST's chat save) and structuredClone (ST's swipe copies) skip it: nothing
-// Desloper writes ever lands in a chat file, and turning it off or uninstalling it leaves no
+// Deslopper writes ever lands in a chat file, and turning it off or uninstalling it leaves no
 // trace. It's recomputed on chat load, which is cheap (string work, cached).
 //
-// Ownership: a WeakMap remembers the text Desloper put there. A display_text Desloper didn't
+// Ownership: a WeakMap remembers the text Deslopper put there. A display_text Deslopper didn't
 // write (the Translate extension's) is never overwritten or deleted.
 //
 // "Rewrite saved messages" mode (st/rewrite.js): the cleaned text is in `mes` itself, so nothing
@@ -50,8 +50,8 @@ function isBeingEdited(id) {
     return !!document.querySelector(`#chat .mes[mesid="${id}"] #curEditTextarea`);
 }
 
-// What's on screen is Desloper's own render while the message text's first node is the one
-// Desloper's render made: any re-render by ST (an edit, a swipe) replaces the nodes. Saves a
+// What's on screen is Deslopper's own render while the message text's first node is the one
+// Deslopper's render made: any re-render by ST (an edit, a swipe) replaces the nodes. Saves a
 // second render of every new reply (ST's "rendered" event right after "received").
 const renderedNode = new WeakMap();
 function noteRendered(id, message) {
@@ -76,7 +76,7 @@ export function setShowAllOriginals(on) {
     refreshAllSafely();
 }
 
-// "Show original" displays the original with Desloper's changes marked (core/diff.js). The
+// "Show original" displays the original with Deslopper's changes marked (core/diff.js). The
 // marker characters ride through ST's rendering; this turns them into spans afterwards. A
 // marked bit can start inside one element and end in another (an italic, a quote, the next
 // paragraph), so it's done per text node, carrying the open marker along.
@@ -127,7 +127,7 @@ function render(ctx, id, message) {
 }
 
 // Brings one message's display in line with the current settings.
-// render: re-render if the display text changed. force: re-render if Desloper's text should show
+// render: re-render if the display text changed. force: re-render if Deslopper's text should show
 // but the screen may not have it (ST just rendered `mes` over it, e.g. after an edit). dirty:
 // `mes` itself changed (rewrite mode), so the screen is stale whatever display_text does.
 // ctx / names / size: passed in by refreshAll so 100 messages don't look them up 100 times.
@@ -190,7 +190,7 @@ export function refreshMessage(id, { render: doRender = true, force = false, dir
 
 // Only the messages ST has on screen are cleaned for display (it shows the last ~100 of a long
 // chat), so opening a 1000-message chat stays quick. Older ones are cleaned when "load more"
-// shows them. Desloper's text on a message that isn't on screen is dropped: it may be stale, and
+// shows them. Deslopper's text on a message that isn't on screen is dropped: it may be stale, and
 // it's recomputed when the message shows up again. In rewrite mode the whole chat's saved text is
 // brought in line first (st/rewrite.js syncChat), since other extensions read all of it.
 let run = 0;
@@ -215,7 +215,7 @@ export async function refreshAll() {
         try {
             if (refreshMessage(i, { ctx, names, size, dirty: dirty.has(i) })) changed++;
         } catch (e) {
-            console.error(`[ST Desloper] message ${i} failed:`, e);
+            console.error(`[ST Deslopper] message ${i} failed:`, e);
         }
         if (performance.now() - slice > 12) {
             await new Promise(r => setTimeout(r, 0));
@@ -228,7 +228,7 @@ export async function refreshAll() {
 }
 
 function refreshAllSafely() {
-    refreshAll().catch(e => console.error("[ST Desloper] refresh failed:", e));
+    refreshAll().catch(e => console.error("[ST Deslopper] refresh failed:", e));
 }
 
 let timer = null;

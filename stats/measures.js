@@ -1,6 +1,6 @@
 // The stats: pure string work over a chat's AI replies. PURE: no SillyTavern imports.
 // Ported from an earlier style-measuring engine of the author's,
-// cut down to what fits a roleplay chat and extended with Desloper's own fixes (docs/PLAN.md section 8).
+// cut down to what fits a roleplay chat and extended with Deslopper's own fixes (docs/PLAN.md section 8).
 //
 // Two passes, so changing the window or the baseline in the popup is instant:
 //   analyze(messages, opts)  -> one record per AI reply (the slow part: runs once per opening)
@@ -51,7 +51,7 @@ export const METRICS = {
 
 export const GROUPS = {
     overview: "Overview",
-    fixes: "Desloper's fixes (per 1000 words)",
+    fixes: "Deslopper's fixes (per 1000 words)",
     repetition: "Repetition",
     llmisms: "LLM-isms",
     speech: "Speech and gestures",
@@ -257,8 +257,8 @@ function sameStartRun(narration) {
     return best;
 }
 
-// Weighted slop points per 1000 words -> 0-100. Weights: a Desloper fix, a stock phrase or a
-// contrast frame = 1; a three-item list, a negation Desloper left alone, each dash past two = 0.5.
+// Weighted slop points per 1000 words -> 0-100. Weights: a Deslopper fix, a stock phrase or a
+// contrast frame = 1; a three-item list, a negation Deslopper left alone, each dash past two = 0.5.
 // 5 points per 1000 words is about 28, 15 is about 63.
 export function slopScore(points, words) {
     if (!words) return 0;
@@ -351,7 +351,7 @@ function analyzeReply(m, lastUser, prev, { lexicon, negRe, clean, names = [] }) 
     const narration = norm(narrationOf(raw));
     const negationList = negationsIn(soft(narrationOf(raw)), negRe);
 
-    // Desloper's fixes, and the negations it left alone (grows the flip table).
+    // Deslopper's fixes, and the negations it left alone (grows the flip table).
     const fixes = {};
     const fixExamples = {};
     const fixLabels = {}; // rule -> { label: count }, for rules whose hits name a phrase
@@ -375,7 +375,7 @@ function analyzeReply(m, lastUser, prev, { lexicon, negRe, clean, names = [] }) 
 
     const dashes = (t.match(/ — | -- /g) || []).length;
     const ellipses = (t.match(/\.\.\./g) || []).length;
-    // One tic counts once: a stock phrase or contrast frame Desloper fixed is already a fix.
+    // One tic counts once: a stock phrase or contrast frame Deslopper fixed is already a fix.
     // Dashes and ellipses weigh half: a converted dash is one of the "dashes past two".
     const dashFixes = fixLabels["dash-budget"]?.dash || 0;
     const dotFixes = fixLabels["dash-budget"]?.ellipsis || 0;
@@ -598,7 +598,7 @@ export function summarize(records, ruleIds = []) {
     const worst = records.filter(r => r.words >= 30).sort((a, b) => b.score - a.score || b.index - a.index).slice(0, 5);
     put("slop_score", slopScore(points, totalWords), 0, [], worst.filter(r => r.score > 0).map(r => ({ index: r.index, quote: r.quote, score: r.score })));
 
-    // Desloper's fixes
+    // Deslopper's fixes
     const ids = new Set(ruleIds);
     for (const r of records) for (const id of Object.keys(r.fixes)) ids.add(id);
     for (const id of ids) {
@@ -802,7 +802,7 @@ export function buildReport(records, { window = [0, records.length], baseline = 
         examples: motifExamples(m),
     }));
 
-    // Negations Desloper left alone, most common first: candidates for the flip table.
+    // Negations Deslopper left alone, most common first: candidates for the flip table.
     const left = new Map();
     for (const r of win) {
         for (const { phrase, quote } of r.leftovers) {

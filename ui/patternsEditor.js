@@ -1,4 +1,4 @@
-// "Your patterns" in the fixes popup: add / edit / delete, import ST Regex scripts or a Desloper
+// "Your patterns" in the fixes popup: add / edit / delete, import ST Regex scripts or a Deslopper
 // export, export to a file. The logic is in rules/patternRules.js. Cards fold like the built-in
 // fixes; the drawer shows a one-line summary.
 
@@ -244,7 +244,7 @@ export function initPatternsEditor($root) {
     });
     $root.find(".sd_pattern_export").on("click", () => {
         if (!patterns().length) return notify("No patterns to export.", "info");
-        download("desloper-patterns.json", exportPatterns(patterns()));
+        download("deslopper-patterns.json", exportPatterns(patterns()));
     });
     const $file = $root.find(".sd_pattern_file");
     $root.find(".sd_pattern_import").on("click", () => $file.trigger("click"));

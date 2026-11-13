@@ -17,9 +17,9 @@ import { tagNamesOf } from "../core/segments.js";
 let openPopup = null;
 
 const TEMPLATE = `
-<div class="sd_popup sd_fx st-desloper-settings">
+<div class="sd_popup sd_fx st-deslopper-settings">
     <div class="sd_popup_title">
-        <span class="sd_popup_name">🧽 Desloper fixes</span>
+        <span class="sd_popup_name">🧽 Deslopper fixes</span>
         <label class="sd_char_pick_wrap" title="Edit the fixes for every character, or for one character's replies only">
             <i class="fa-solid fa-user"></i>
             <select class="text_pole sd_select sd_char_pick"></select>
@@ -71,11 +71,11 @@ const TEMPLATE = `
             </section>
             <section class="sd_pane" data-pane="patterns">
                 <div class="sd_toolbar">
-                    <span class="sd_note">Find text and replace or delete it: plain text, or /regex/flags like ST's Regex extension. Every change still goes through Desloper's repair step (punctuation, capitals, emptied quotes).</span>
+                    <span class="sd_note">Find text and replace or delete it: plain text, or /regex/flags like ST's Regex extension. Every change still goes through Deslopper's repair step (punctuation, capitals, emptied quotes).</span>
                 </div>
                 <div class="sd_buttons">
                     <div class="menu_button sd_button_main sd_pattern_add" title="Add an empty pattern"><i class="fa-solid fa-plus"></i><span>Add pattern</span></div>
-                    <div class="menu_button sd_pattern_import" title="Import ST Regex scripts (.json) or a Desloper export"><i class="fa-solid fa-file-import"></i><span>Import</span></div>
+                    <div class="menu_button sd_pattern_import" title="Import ST Regex scripts (.json) or a Deslopper export"><i class="fa-solid fa-file-import"></i><span>Import</span></div>
                     <div class="menu_button sd_pattern_export" title="Save your patterns to a .json file"><i class="fa-solid fa-file-export"></i><span>Export</span></div>
                     <input class="sd_pattern_file" type="file" accept=".json,application/json" hidden />
                 </div>

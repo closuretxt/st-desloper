@@ -121,7 +121,7 @@ function onMutation() {
         // Our own write would wake the observer again.
         observer?.takeRecords();
     } catch (e) {
-        console.error("[ST Desloper] stream cleaning failed:", e);
+        console.error("[ST Deslopper] stream cleaning failed:", e);
         // Show the text as ST wrote it rather than a stale render.
         const w = watched;
         stop();

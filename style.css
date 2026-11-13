@@ -1,9 +1,9 @@
-/* ===================== ST Desloper =====================
+/* ===================== ST Deslopper =====================
    One look for the drawer, the fixes popup and the stats: glassy cards over ST's own blur,
    colours taken from the user's theme (body colour for the glass so light themes work too,
    the quote colour as the accent). */
 
-.st-desloper-settings {
+.st-deslopper-settings {
     --sd-line: var(--SmartThemeBorderColor, rgba(255, 255, 255, 0.12));
     --sd-line-soft: color-mix(in srgb, var(--SmartThemeBodyColor, #ddd) 8%, transparent);
     --sd-accent: var(--SmartThemeQuoteColor, #b8912f);
@@ -20,17 +20,17 @@
 /* ---------- Shared pieces ---------- */
 
 /* The display rules below would otherwise beat the hidden attribute. */
-.st-desloper-settings [hidden] {
+.st-deslopper-settings [hidden] {
     display: none !important;
 }
 
-.st-desloper-settings .sd_note {
+.st-deslopper-settings .sd_note {
     font-size: 0.82em;
     opacity: var(--sd-muted);
     line-height: 1.35;
 }
 
-.st-desloper-settings .sd_hint {
+.st-deslopper-settings .sd_hint {
     display: block;
     font-size: 0.82em;
     opacity: 0.55;
@@ -38,7 +38,7 @@
     line-height: 1.3;
 }
 
-.st-desloper-settings .sd_badge {
+.st-deslopper-settings .sd_badge {
     display: inline-block;
     font-size: 0.75em;
     font-weight: 600;
@@ -50,18 +50,18 @@
     opacity: 0.85;
 }
 
-.st-desloper-settings .sd_badge:empty {
+.st-deslopper-settings .sd_badge:empty {
     display: none;
 }
 
-.st-desloper-settings .sd_section_head {
+.st-deslopper-settings .sd_section_head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 8px;
 }
 
-.st-desloper-settings .sd_section_title {
+.st-deslopper-settings .sd_section_title {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -72,26 +72,26 @@
     opacity: 0.75;
 }
 
-.st-desloper-settings .sd_section_title i {
+.st-deslopper-settings .sd_section_title i {
     color: var(--sd-accent);
     opacity: 0.9;
 }
 
-.st-desloper-settings .sd_arrow {
+.st-deslopper-settings .sd_arrow {
     color: var(--sd-accent);
     font-weight: bold;
 }
 
-.st-desloper-settings .sd_mono {
+.st-deslopper-settings .sd_mono {
     font-family: var(--monoFontFamily, monospace);
 }
 
-.st-desloper-settings .sd_error {
+.st-deslopper-settings .sd_error {
     color: var(--sd-warn);
     font-size: 0.82em;
 }
 
-.st-desloper-settings .sd_empty {
+.st-deslopper-settings .sd_empty {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -104,29 +104,29 @@
     border-radius: var(--sd-radius);
 }
 
-.st-desloper-settings .sd_empty i {
+.st-deslopper-settings .sd_empty i {
     font-size: 1.6em;
     opacity: 0.7;
 }
 
-.st-desloper-settings .text_pole {
+.st-deslopper-settings .text_pole {
     margin: 0;
 }
 
-.st-desloper-settings .sd_textarea {
+.st-deslopper-settings .sd_textarea {
     resize: vertical;
     min-height: 2.4em;
     width: 100%;
     box-sizing: border-box;
 }
 
-.st-desloper-settings .sd_buttons {
+.st-deslopper-settings .sd_buttons {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
 }
 
-.st-desloper-settings .menu_button {
+.st-deslopper-settings .menu_button {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -136,20 +136,20 @@
     white-space: nowrap;
 }
 
-.st-desloper-settings .menu_button.sd_button_main {
+.st-deslopper-settings .menu_button.sd_button_main {
     border-color: color-mix(in srgb, var(--sd-accent) 55%, var(--sd-line));
     background-color: var(--sd-accent-soft);
 }
 
-.st-desloper-settings .menu_button.sd_button_main:hover {
+.st-deslopper-settings .menu_button.sd_button_main:hover {
     background-color: color-mix(in srgb, var(--sd-accent) 34%, transparent);
 }
 
-.st-desloper-settings .sd_link,
-.st-desloper-settings .sd_icon_button,
-.st-desloper-settings .sd_pill_button,
-.st-desloper-settings .sd_seg,
-.st-desloper-settings .sd_tab {
+.st-deslopper-settings .sd_link,
+.st-deslopper-settings .sd_icon_button,
+.st-deslopper-settings .sd_pill_button,
+.st-deslopper-settings .sd_seg,
+.st-deslopper-settings .sd_tab {
     font: inherit;
     color: inherit;
     background: none;
@@ -158,7 +158,7 @@
     cursor: pointer;
 }
 
-.st-desloper-settings .sd_link {
+.st-deslopper-settings .sd_link {
     font-size: 0.8em;
     padding: 2px 4px;
     opacity: 0.65;
@@ -166,24 +166,24 @@
     text-underline-offset: 3px;
 }
 
-.st-desloper-settings .sd_link:hover {
+.st-deslopper-settings .sd_link:hover {
     opacity: 1;
 }
 
-.st-desloper-settings .sd_icon_button {
+.st-deslopper-settings .sd_icon_button {
     padding: 5px 7px;
     border-radius: 6px;
     opacity: 0.5;
     font-size: 0.85em;
 }
 
-.st-desloper-settings .sd_icon_button:hover {
+.st-deslopper-settings .sd_icon_button:hover {
     opacity: 1;
     color: var(--sd-warn);
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_pill_button {
+.st-deslopper-settings .sd_pill_button {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -195,13 +195,13 @@
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_pill_button:hover {
+.st-deslopper-settings .sd_pill_button:hover {
     background: color-mix(in srgb, var(--sd-accent) 36%, transparent);
 }
 
 /* Switch: a pill toggle instead of ST's square box. The extra classes out-rank ST's
    input[type='checkbox'] rules (size, tick clip-path, scale(0) knob). */
-.st-desloper-settings input[type="checkbox"].sd_switch {
+.st-deslopper-settings input[type="checkbox"].sd_switch {
     /* Whole pixels on purpose: the knob gets the same gap on every side, so it is
        concentric with the track ends. With em sizes the gaps land on fractions of a
        pixel and get rounded differently top vs bottom, which looks off-centre.
@@ -233,7 +233,7 @@
     transition: background-color 0.18s, border-color 0.18s;
 }
 
-.st-desloper-settings input[type="checkbox"].sd_switch::before {
+.st-deslopper-settings input[type="checkbox"].sd_switch::before {
     content: "";
     position: absolute;
     top: var(--sd-sw-gap);
@@ -255,23 +255,23 @@
     transition: left 0.18s, opacity 0.18s;
 }
 
-.st-desloper-settings input[type="checkbox"].sd_switch:checked {
+.st-deslopper-settings input[type="checkbox"].sd_switch:checked {
     background: color-mix(in srgb, var(--sd-accent) 62%, transparent);
     border-color: color-mix(in srgb, var(--sd-accent) 80%, transparent) !important;
 }
 
-.st-desloper-settings input[type="checkbox"].sd_switch:checked::before {
+.st-deslopper-settings input[type="checkbox"].sd_switch:checked::before {
     left: calc(100% - var(--sd-sw-gap) - var(--sd-sw-knob));
     opacity: 1;
     transform: none;
 }
 
-.st-desloper-settings input[type="checkbox"].sd_switch:focus-visible {
+.st-deslopper-settings input[type="checkbox"].sd_switch:focus-visible {
     outline: 2px solid var(--sd-accent);
     outline-offset: 2px;
 }
 
-.st-desloper-settings .sd_switch_label {
+.st-deslopper-settings .sd_switch_label {
     display: inline-flex;
     align-items: center;
     gap: 8px;
@@ -281,7 +281,7 @@
 }
 
 /* Both | Screen | Model */
-.st-desloper-settings .sd_segmented {
+.st-deslopper-settings .sd_segmented {
     display: inline-flex;
     flex: 0 0 auto;
     gap: 2px;
@@ -291,7 +291,7 @@
     background: var(--sd-well);
 }
 
-.st-desloper-settings .sd_seg {
+.st-deslopper-settings .sd_seg {
     font-size: 0.76em;
     padding: 2px 9px;
     border-radius: 999px;
@@ -300,11 +300,11 @@
     transition: background-color 0.15s, opacity 0.15s;
 }
 
-.st-desloper-settings .sd_seg:hover {
+.st-deslopper-settings .sd_seg:hover {
     opacity: 0.9;
 }
 
-.st-desloper-settings .sd_seg.sd_active {
+.st-deslopper-settings .sd_seg.sd_active {
     opacity: 1;
     background: color-mix(in srgb, var(--sd-accent) 32%, transparent);
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--sd-accent) 60%, transparent);
@@ -312,14 +312,14 @@
 
 /* ---------- Settings drawer ---------- */
 
-.st-desloper-settings .sd_drawer {
+.st-deslopper-settings .sd_drawer {
     display: flex;
     flex-direction: column;
     gap: 10px;
     padding-top: 6px;
 }
 
-.st-desloper-settings .sd_master {
+.st-deslopper-settings .sd_master {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -330,11 +330,11 @@
     background: var(--sd-glass);
 }
 
-.st-desloper-settings .sd_master_main {
+.st-deslopper-settings .sd_master_main {
     font-weight: 600;
 }
 
-.st-desloper-settings .sd_section {
+.st-deslopper-settings .sd_section {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -343,13 +343,13 @@
 }
 
 /* Natural-width chips that wrap: no name gets cut, and short names don't waste a column. */
-.st-desloper-settings .sd_quick {
+.st-deslopper-settings .sd_quick {
     display: flex;
     flex-wrap: wrap;
     gap: 4px;
 }
 
-.st-desloper-settings .sd_chip {
+.st-deslopper-settings .sd_chip {
     flex: 0 1 auto;
     max-width: 100%;
     min-width: 0;
@@ -361,12 +361,12 @@
     transition: background-color 0.15s, border-color 0.15s;
 }
 
-.st-desloper-settings .sd_chip:hover {
+.st-deslopper-settings .sd_chip:hover {
     border-color: var(--sd-line-soft);
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_chip_name {
+.st-deslopper-settings .sd_chip_name {
     flex: 1;
     min-width: 0;
     overflow: hidden;
@@ -374,23 +374,23 @@
     text-overflow: ellipsis;
 }
 
-.st-desloper-settings .sd_chip.sd_off .sd_chip_name {
+.st-deslopper-settings .sd_chip.sd_off .sd_chip_name {
     opacity: 0.45;
 }
 
-.st-desloper-settings .sd_chip_where {
+.st-deslopper-settings .sd_chip_where {
     font-size: 0.8em;
     opacity: 0.55;
 }
 
-.st-desloper-settings .sd_stats_row {
+.st-deslopper-settings .sd_stats_row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 12px;
 }
 
-.st-desloper-settings .sd_quick_patterns {
+.st-deslopper-settings .sd_quick_patterns {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -402,15 +402,15 @@
     transition: background-color 0.15s;
 }
 
-.st-desloper-settings .sd_quick_patterns:hover {
+.st-deslopper-settings .sd_quick_patterns:hover {
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_quick_patterns > i:first-child {
+.st-deslopper-settings .sd_quick_patterns > i:first-child {
     color: var(--sd-accent);
 }
 
-.st-desloper-settings .sd_quick_patterns_go {
+.st-deslopper-settings .sd_quick_patterns_go {
     margin-left: auto;
     font-size: 0.8em;
     opacity: 0.5;
@@ -418,11 +418,11 @@
 
 /* ---------- Popups (fixes and stats) ---------- */
 
-.st-desloper-settings.sd_popup {
+.st-deslopper-settings.sd_popup {
     text-align: left;
 }
 
-.st-desloper-settings .sd_popup_title {
+.st-deslopper-settings .sd_popup_title {
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
@@ -430,54 +430,54 @@
     padding: 2px 2px 8px;
 }
 
-.st-desloper-settings .sd_popup_name {
+.st-deslopper-settings .sd_popup_name {
     font-size: 1.15em;
     font-weight: 700;
 }
 
 /* Per-character fixes: the picker, and what changes while a character is picked. */
-.st-desloper-settings .sd_char_pick_wrap {
+.st-deslopper-settings .sd_char_pick_wrap {
     display: inline-flex;
     align-items: center;
     gap: 6px;
     align-self: center;
 }
 
-.st-desloper-settings .sd_char_pick_wrap > i {
+.st-deslopper-settings .sd_char_pick_wrap > i {
     opacity: var(--sd-muted);
     font-size: 0.85em;
 }
 
-.st-desloper-settings .sd_char_pick {
+.st-deslopper-settings .sd_char_pick {
     width: auto;
     min-width: 11em;
     max-width: 18em;
     margin: 0;
 }
 
-.st-desloper-settings.sd_char_mode .sd_char_pick {
+.st-deslopper-settings.sd_char_mode .sd_char_pick {
     border-color: var(--sd-accent);
 }
 
-.st-desloper-settings.sd_char_mode .sd_scope_note {
+.st-deslopper-settings.sd_char_mode .sd_scope_note {
     color: var(--sd-accent);
     opacity: 1;
 }
 
 /* The budget window is the same for everyone. */
-.st-desloper-settings.sd_char_mode .sd_globals {
+.st-deslopper-settings.sd_char_mode .sd_globals {
     display: none;
 }
 
 /* The fixes tab's global settings: one box, a label column, a soft line between rows. */
-.st-desloper-settings .sd_globals {
+.st-deslopper-settings .sd_globals {
     border-radius: var(--sd-radius);
     border: 1px solid var(--sd-line-soft);
     background: var(--sd-glass);
     margin-bottom: 10px;
 }
 
-.st-desloper-settings .sd_global_row {
+.st-deslopper-settings .sd_global_row {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -485,11 +485,11 @@
     padding: 6px 12px;
 }
 
-.st-desloper-settings .sd_global_row + .sd_global_row {
+.st-deslopper-settings .sd_global_row + .sd_global_row {
     border-top: 1px solid var(--sd-line-soft);
 }
 
-.st-desloper-settings .sd_global_label {
+.st-deslopper-settings .sd_global_label {
     flex: 0 0 7.5em;
     font-size: 11px;
     font-weight: 600;
@@ -498,7 +498,7 @@
     opacity: var(--sd-muted);
 }
 
-.st-desloper-settings .sd_global_body {
+.st-deslopper-settings .sd_global_body {
     flex: 1 1 auto;
     min-width: 0;
     display: flex;
@@ -507,25 +507,25 @@
     gap: 6px 16px;
 }
 
-.st-desloper-settings .sd_global_inline {
+.st-deslopper-settings .sd_global_inline {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
 }
 
-.st-desloper-settings .sd_global_info {
+.st-deslopper-settings .sd_global_info {
     margin-left: auto;
     opacity: 0.4;
     cursor: help;
 }
 
-.st-desloper-settings .sd_global_info:hover {
+.st-deslopper-settings .sd_global_info:hover {
     opacity: 0.85;
 }
 
 /* "Click a fix…" sits on the list it describes, a line under it. */
-.st-desloper-settings .sd_list_head {
+.st-deslopper-settings .sd_list_head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -535,59 +535,59 @@
     border-bottom: 1px solid var(--sd-line-soft);
 }
 
-.st-desloper-settings .sd_skip_check {
+.st-deslopper-settings .sd_skip_check {
     margin: 0;
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_skip_tags {
+.st-deslopper-settings .sd_skip_tags {
     flex: 1 1 12em;
     min-width: 9em;
     margin: 0;
 }
 
 @media (max-width: 600px) {
-    .st-desloper-settings .sd_global_row {
+    .st-deslopper-settings .sd_global_row {
         flex-direction: column;
         align-items: stretch;
         gap: 6px;
     }
 
-    .st-desloper-settings .sd_global_label {
+    .st-deslopper-settings .sd_global_label {
         flex: none;
     }
 }
 
-.st-desloper-settings .sd_skip_tags:disabled {
+.st-deslopper-settings .sd_skip_tags:disabled {
     opacity: 0.45;
 }
 
-.st-desloper-settings .sd_reset_global {
+.st-deslopper-settings .sd_reset_global {
     display: none;
 }
 
-.st-desloper-settings .sd_rule.sd_custom .sd_reset_global {
+.st-deslopper-settings .sd_rule.sd_custom .sd_reset_global {
     display: inline-block;
     opacity: 1;
     color: var(--sd-accent);
 }
 
-.st-desloper-settings .sd_rule.sd_custom {
+.st-deslopper-settings .sd_rule.sd_custom {
     border-color: var(--sd-accent-soft);
 }
 
-.st-desloper-settings .sd_pattern_globals {
+.st-deslopper-settings .sd_pattern_globals {
     display: flex;
     flex-direction: column;
     gap: 4px;
     margin-top: 14px;
 }
 
-.st-desloper-settings .sd_pattern_globals[hidden] {
+.st-deslopper-settings .sd_pattern_globals[hidden] {
     display: none;
 }
 
-.st-desloper-settings .sd_global_pattern {
+.st-deslopper-settings .sd_global_pattern {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -597,22 +597,22 @@
     min-width: 0;
 }
 
-.st-desloper-settings .sd_global_pattern .sd_card_desc {
+.st-deslopper-settings .sd_global_pattern .sd_card_desc {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
 }
 
-.st-desloper-settings .sd_global_pattern.sd_off .sd_card_name {
+.st-deslopper-settings .sd_global_pattern.sd_off .sd_card_name {
     opacity: 0.45;
 }
 
-.st-desloper-settings .sd_global_pattern.sd_custom {
+.st-deslopper-settings .sd_global_pattern.sd_custom {
     box-shadow: inset 2px 0 0 var(--sd-accent);
 }
 
-.st-desloper-settings .sd_toolbar {
+.st-deslopper-settings .sd_toolbar {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -623,20 +623,20 @@
     background: var(--sd-glass);
 }
 
-.st-desloper-settings .sd_toolbar_end {
+.st-deslopper-settings .sd_toolbar_end {
     display: flex;
     gap: 6px;
     margin-left: auto;
 }
 
-.st-desloper-settings .sd_control {
+.st-deslopper-settings .sd_control {
     display: flex;
     align-items: center;
     gap: 7px;
     margin: 0;
 }
 
-.st-desloper-settings .sd_control_label {
+.st-deslopper-settings .sd_control_label {
     font-size: 11px;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -645,25 +645,25 @@
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_select {
+.st-deslopper-settings .sd_select {
     width: auto;
     min-width: 0;
 }
 
-.st-desloper-settings .sd_number {
+.st-deslopper-settings .sd_number {
     width: 4.8em;
     flex: 0 0 auto;
     text-align: center;
 }
 
 /* Tabs */
-.st-desloper-settings .sd_tabs {
+.st-deslopper-settings .sd_tabs {
     display: flex;
     gap: 2px;
     border-bottom: 1px solid var(--sd-line);
 }
 
-.st-desloper-settings .sd_tab {
+.st-deslopper-settings .sd_tab {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -674,54 +674,54 @@
     transition: opacity 0.15s, border-color 0.15s;
 }
 
-.st-desloper-settings .sd_tab:hover {
+.st-deslopper-settings .sd_tab:hover {
     opacity: 0.9;
 }
 
-.st-desloper-settings .sd_tab.sd_active {
+.st-deslopper-settings .sd_tab.sd_active {
     opacity: 1;
     border-bottom-color: var(--sd-accent);
 }
 
-.st-desloper-settings .sd_tab.sd_active i {
+.st-deslopper-settings .sd_tab.sd_active i {
     color: var(--sd-accent);
 }
 
-.st-desloper-settings .sd_tab_count {
+.st-deslopper-settings .sd_tab_count {
     font-size: 0.72em;
     padding: 0 7px;
     border-radius: 999px;
     background: var(--sd-well);
 }
 
-.st-desloper-settings .sd_tab_count:empty {
+.st-deslopper-settings .sd_tab_count:empty {
     display: none;
 }
 
 /* Cards: the built-in fixes, your patterns, the stats sections. */
-.st-desloper-settings .sd_card_list {
+.st-deslopper-settings .sd_card_list {
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
 
-.st-desloper-settings .sd_card {
+.st-deslopper-settings .sd_card {
     border-radius: var(--sd-radius);
     border: 1px solid var(--sd-line-soft);
     background: var(--sd-glass);
     transition: background-color 0.15s, border-color 0.15s;
 }
 
-.st-desloper-settings .sd_card_list .sd_card:hover,
-.st-desloper-settings .sd_card.sd_open {
+.st-deslopper-settings .sd_card_list .sd_card:hover,
+.st-deslopper-settings .sd_card.sd_open {
     border-color: var(--sd-line);
 }
 
-.st-desloper-settings .sd_card.sd_open {
+.st-deslopper-settings .sd_card.sd_open {
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_card_head {
+.st-deslopper-settings .sd_card_head {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -729,19 +729,19 @@
     cursor: pointer;
 }
 
-.st-desloper-settings .sd_card_title {
+.st-deslopper-settings .sd_card_title {
     flex: 1;
     min-width: 0;
 }
 
-.st-desloper-settings .sd_card_name {
+.st-deslopper-settings .sd_card_name {
     display: block;
     overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
 
-.st-desloper-settings .sd_card_desc {
+.st-deslopper-settings .sd_card_desc {
     font-size: 0.8em;
     opacity: 0.58;
     overflow: hidden;
@@ -749,15 +749,15 @@
     text-overflow: ellipsis;
 }
 
-.st-desloper-settings .sd_card_desc:empty {
+.st-deslopper-settings .sd_card_desc:empty {
     display: none;
 }
 
-.st-desloper-settings .sd_rule.sd_open .sd_card_head .sd_card_desc {
+.st-deslopper-settings .sd_rule.sd_open .sd_card_head .sd_card_desc {
     display: none;
 }
 
-.st-desloper-settings .sd_card_about {
+.st-deslopper-settings .sd_card_about {
     margin-bottom: 12px;
     padding: 7px 10px;
     font-size: 0.84em;
@@ -768,44 +768,44 @@
     opacity: 0.88;
 }
 
-.st-desloper-settings .sd_card.sd_off .sd_card_title {
+.st-deslopper-settings .sd_card.sd_off .sd_card_title {
     opacity: 0.45;
 }
 
-.st-desloper-settings .sd_chevron {
+.st-deslopper-settings .sd_chevron {
     flex: 0 0 auto;
     font-size: 0.75em;
     opacity: 0.45;
     transition: transform 0.2s;
 }
 
-.st-desloper-settings .sd_card.sd_open .sd_chevron {
+.st-deslopper-settings .sd_card.sd_open .sd_chevron {
     transform: rotate(180deg);
 }
 
-.st-desloper-settings .sd_card_body {
+.st-deslopper-settings .sd_card_body {
     display: none;
     margin: 0 10px;
     padding: 10px 0 12px;
     border-top: 1px solid var(--sd-line-soft);
 }
 
-.st-desloper-settings .sd_card.sd_open .sd_card_body {
+.st-deslopper-settings .sd_card.sd_open .sd_card_body {
     display: block;
 }
 
 /* Option fields: two columns when there's room; lists and phrase tables span both. */
-.st-desloper-settings .sd_fields {
+.st-deslopper-settings .sd_fields {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 10px 18px;
 }
 
-.st-desloper-settings .sd_fields + .sd_fields {
+.st-deslopper-settings .sd_fields + .sd_fields {
     margin-top: 12px;
 }
 
-.st-desloper-settings .sd_field {
+.st-deslopper-settings .sd_field {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -813,7 +813,7 @@
     margin: 0;
 }
 
-.st-desloper-settings .sd_field_label {
+.st-deslopper-settings .sd_field_label {
     display: flex;
     flex-direction: column;
     flex: 1;
@@ -821,30 +821,30 @@
     font-size: 0.88em;
 }
 
-.st-desloper-settings .sd_field_inline .text_pole {
+.st-deslopper-settings .sd_field_inline .text_pole {
     flex: 0 1 55%;
     min-width: 0;
 }
 
-.st-desloper-settings .sd_field_check {
+.st-deslopper-settings .sd_field_check {
     align-items: flex-start;
 }
 
-.st-desloper-settings .sd_field_check .sd_switch {
+.st-deslopper-settings .sd_field_check .sd_switch {
     margin-top: 0.1em;
 }
 
-.st-desloper-settings .sd_field_stack {
+.st-deslopper-settings .sd_field_stack {
     flex-direction: column;
     align-items: stretch;
     gap: 4px;
 }
 
-.st-desloper-settings .sd_field_wide {
+.st-deslopper-settings .sd_field_wide {
     grid-column: 1 / -1;
 }
 
-.st-desloper-settings .sd_checks {
+.st-deslopper-settings .sd_checks {
     display: flex;
     flex-wrap: wrap;
     gap: 6px 18px;
@@ -852,31 +852,31 @@
 }
 
 /* Stock phrases inside their card */
-.st-desloper-settings details > summary {
+.st-deslopper-settings details > summary {
     list-style: none;
 }
 
-.st-desloper-settings details > summary::-webkit-details-marker {
+.st-deslopper-settings details > summary::-webkit-details-marker {
     display: none;
 }
 
-.st-desloper-settings .sd_summary_chevron {
+.st-deslopper-settings .sd_summary_chevron {
     font-size: 0.7em;
     opacity: 0.5;
     transition: transform 0.2s;
 }
 
-.st-desloper-settings details[open] > summary .sd_summary_chevron {
+.st-deslopper-settings details[open] > summary .sd_summary_chevron {
     transform: rotate(90deg);
 }
 
-.st-desloper-settings .sd_phrases {
+.st-deslopper-settings .sd_phrases {
     border-radius: 6px;
     border: 1px solid var(--sd-line-soft);
     background: var(--sd-well);
 }
 
-.st-desloper-settings .sd_phrases > summary {
+.st-deslopper-settings .sd_phrases > summary {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -886,19 +886,19 @@
     cursor: pointer;
 }
 
-.st-desloper-settings .sd_phrases > summary .sd_hint {
+.st-deslopper-settings .sd_phrases > summary .sd_hint {
     flex-basis: 100%;
     padding-left: 1.4em;
 }
 
-.st-desloper-settings .sd_phrase_list {
+.st-deslopper-settings .sd_phrase_list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 6px;
     padding: 0 8px 8px;
 }
 
-.st-desloper-settings .sd_phrase {
+.st-deslopper-settings .sd_phrase {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -907,25 +907,25 @@
     background: var(--sd-glass);
 }
 
-.st-desloper-settings .sd_phrase_name {
+.st-deslopper-settings .sd_phrase_name {
     font-size: 0.88em;
     font-weight: 600;
 }
 
-.st-desloper-settings .sd_phrase_example {
+.st-deslopper-settings .sd_phrase_example {
     font-size: 0.78em;
     opacity: 0.55;
     font-style: italic;
 }
 
-.st-desloper-settings .sd_phrase_pool {
+.st-deslopper-settings .sd_phrase_pool {
     display: flex;
     align-items: center;
     gap: 8px;
     margin: 0;
 }
 
-.st-desloper-settings .sd_phrase_pool_label {
+.st-deslopper-settings .sd_phrase_pool_label {
     flex: 0 0 auto;
     font-size: 0.75em;
     opacity: 0.6;
@@ -933,7 +933,7 @@
     letter-spacing: 0.04em;
 }
 
-.st-desloper-settings .sd_phrase_pool .text_pole {
+.st-deslopper-settings .sd_phrase_pool .text_pole {
     flex: 1;
     min-width: 0;
     font-size: 0.85em;
@@ -954,7 +954,7 @@
     min-height: 0;
 }
 
-.st-desloper-settings.sd_fx {
+.st-deslopper-settings.sd_fx {
     container-type: inline-size;
     display: flex;
     flex-direction: column;
@@ -963,7 +963,7 @@
     gap: 10px;
 }
 
-.st-desloper-settings .sd_fx_body {
+.st-deslopper-settings .sd_fx_body {
     flex: 1 1 auto;
     min-height: 0;
     display: grid;
@@ -971,36 +971,36 @@
     gap: 14px;
 }
 
-.st-desloper-settings .sd_fx_main,
-.st-desloper-settings .sd_fx_tester {
+.st-deslopper-settings .sd_fx_main,
+.st-deslopper-settings .sd_fx_tester {
     min-height: 0;
     overflow-y: auto;
     padding-right: 4px;
 }
 
-.st-desloper-settings.sd_fx .sd_pane {
+.st-deslopper-settings.sd_fx .sd_pane {
     display: none;
 }
 
-.st-desloper-settings.sd_fx[data-tab="fixes"] [data-pane="fixes"],
-.st-desloper-settings.sd_fx[data-tab="patterns"] [data-pane="patterns"] {
+.st-deslopper-settings.sd_fx[data-tab="fixes"] [data-pane="fixes"],
+.st-deslopper-settings.sd_fx[data-tab="patterns"] [data-pane="patterns"] {
     display: flex;
 }
 
-.st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
+.st-deslopper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
     display: none;
 }
 
-.st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_tester {
+.st-deslopper-settings.sd_fx[data-tab="tester"] .sd_fx_tester {
     display: flex;
 }
 
-.st-desloper-settings.sd_fx section.sd_pane {
+.st-deslopper-settings.sd_fx section.sd_pane {
     flex-direction: column;
     gap: 8px;
 }
 
-.st-desloper-settings.sd_fx .sd_toolbar {
+.st-deslopper-settings.sd_fx .sd_toolbar {
     padding: 0 2px;
     border: 0;
     background: none;
@@ -1008,20 +1008,20 @@
 
 /* Wide popup: the tester becomes a column beside the list, and its tab goes away. */
 @container (min-width: 860px) {
-    .st-desloper-settings .sd_fx_body {
+    .st-deslopper-settings .sd_fx_body {
         grid-template-columns: minmax(0, 1fr) minmax(300px, 36%);
     }
 
-    .st-desloper-settings.sd_fx .sd_fx_tester,
-    .st-desloper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
+    .st-deslopper-settings.sd_fx .sd_fx_tester,
+    .st-deslopper-settings.sd_fx[data-tab="tester"] .sd_fx_main {
         display: flex;
     }
 
-    .st-desloper-settings.sd_fx[data-tab="tester"] [data-pane="fixes"] {
+    .st-deslopper-settings.sd_fx[data-tab="tester"] [data-pane="fixes"] {
         display: flex;
     }
 
-    .st-desloper-settings.sd_fx .sd_tab_tester {
+    .st-deslopper-settings.sd_fx .sd_tab_tester {
         display: none;
     }
 }
@@ -1029,7 +1029,7 @@
 /* Narrow: "Both / Screen / Model" takes the description's line under the name instead of
    squeezing the name; the description shows once the card is open. */
 @container (max-width: 560px) {
-    .st-desloper-settings .sd_card_head {
+    .st-deslopper-settings .sd_card_head {
         display: grid;
         grid-template-columns: auto minmax(0, 1fr) auto auto;
         grid-template-areas:
@@ -1038,62 +1038,62 @@
         row-gap: 5px;
     }
 
-    .st-desloper-settings .sd_card_head > .sd_switch {
+    .st-deslopper-settings .sd_card_head > .sd_switch {
         grid-area: sw;
     }
 
-    .st-desloper-settings .sd_card_head > .sd_card_title {
+    .st-deslopper-settings .sd_card_head > .sd_card_title {
         grid-area: title;
     }
 
-    .st-desloper-settings .sd_card_head > .sd_segmented {
+    .st-deslopper-settings .sd_card_head > .sd_segmented {
         grid-area: seg;
         justify-self: start;
     }
 
-    .st-desloper-settings .sd_card_head > .sd_icon_button {
+    .st-deslopper-settings .sd_card_head > .sd_icon_button {
         grid-area: del;
     }
 
-    .st-desloper-settings .sd_card_head > .sd_chevron {
+    .st-deslopper-settings .sd_card_head > .sd_chevron {
         grid-area: chev;
     }
 
-    .st-desloper-settings .sd_card:not(.sd_open) .sd_card_desc {
+    .st-deslopper-settings .sd_card:not(.sd_open) .sd_card_desc {
         display: none;
     }
 
-    .st-desloper-settings.sd_fx .sd_toolbar_end {
+    .st-deslopper-settings.sd_fx .sd_toolbar_end {
         margin-left: 0;
     }
 
-    .st-desloper-settings .sd_tabs {
+    .st-deslopper-settings .sd_tabs {
         overflow-x: auto;
         scrollbar-width: none;
     }
 
-    .st-desloper-settings .sd_tab {
+    .st-deslopper-settings .sd_tab {
         padding: 7px 9px;
         white-space: nowrap;
     }
 
-    .st-desloper-settings .sd_tab > i {
+    .st-deslopper-settings .sd_tab > i {
         display: none;
     }
 }
 
 /* Tester */
 /* Children keep their size: in a scrolling flex column they'd otherwise squash the textareas. */
-.st-desloper-settings .sd_fx_tester > *,
-.st-desloper-settings.sd_fx section.sd_pane > * {
+.st-deslopper-settings .sd_fx_tester > *,
+.st-deslopper-settings.sd_fx section.sd_pane > * {
     flex-shrink: 0;
 }
 
-.st-desloper-settings .sd_tester_input {
+.st-deslopper-settings .sd_tester_input {
     min-height: 8em;
 }
 
-.st-desloper-settings .sd_fx_tester {
+.st-deslopper-settings .sd_fx_tester {
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
@@ -1102,18 +1102,18 @@
     background: var(--sd-glass);
 }
 
-.st-desloper-settings .sd_tester_row {
+.st-deslopper-settings .sd_tester_row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: 6px 10px;
 }
 
-.st-desloper-settings .sd_tester_row .sd_field_label {
+.st-deslopper-settings .sd_tester_row .sd_field_label {
     flex: 0 0 auto;
 }
 
-.st-desloper-settings .sd_tester_output {
+.st-deslopper-settings .sd_tester_output {
     min-height: 4em;
     padding: 8px 10px;
     border-radius: 6px;
@@ -1124,13 +1124,13 @@
     line-height: 1.45;
 }
 
-.st-desloper-settings .sd_tester_output:empty::before {
+.st-deslopper-settings .sd_tester_output:empty::before {
     content: "The cleaned text shows here.";
     opacity: 0.45;
     font-style: italic;
 }
 
-.st-desloper-settings .sd_tester_hits {
+.st-deslopper-settings .sd_tester_hits {
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -1140,38 +1140,38 @@
     font-size: 0.84em;
 }
 
-.st-desloper-settings .sd_tester_hits li {
+.st-deslopper-settings .sd_tester_hits li {
     padding: 5px 9px;
     border-left: 2px solid var(--sd-accent);
     border-radius: 0 6px 6px 0;
     background: var(--sd-glass);
 }
 
-.st-desloper-settings .sd_hit_rule {
+.st-deslopper-settings .sd_hit_rule {
     font-size: 0.82em;
     font-weight: 700;
     letter-spacing: 0.03em;
     opacity: 0.8;
 }
 
-.st-desloper-settings .sd_hit_before {
+.st-deslopper-settings .sd_hit_before {
     text-decoration: line-through;
     opacity: 0.6;
 }
 
-.st-desloper-settings .sd_tester_notes {
+.st-deslopper-settings .sd_tester_notes {
     font-size: 0.78em;
     opacity: 0.5;
     white-space: pre-wrap;
 }
 
-.st-desloper-settings .sd_tester_notes:empty {
+.st-deslopper-settings .sd_tester_notes:empty {
     display: none;
 }
 
 /* ---------- Stats ---------- */
 
-.st-desloper-settings.sd_stats {
+.st-deslopper-settings.sd_stats {
     container-type: inline-size;
     display: flex;
     flex-direction: column;
@@ -1179,7 +1179,7 @@
 }
 
 /* Two columns of metric cards on a wide popup; the hero and the long-quote cards span both. */
-.st-desloper-settings .sd_stats_body {
+.st-deslopper-settings .sd_stats_body {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     align-items: start;
@@ -1187,25 +1187,25 @@
 }
 
 @container (min-width: 860px) {
-    .st-desloper-settings .sd_stats_body {
+    .st-deslopper-settings .sd_stats_body {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
-    .st-desloper-settings .sd_stats_body > .sd_hero,
-    .st-desloper-settings .sd_stats_body > .sd_span,
-    .st-desloper-settings .sd_stats_body > .sd_empty,
-    .st-desloper-settings .sd_stats_body > .sd_stats_foot {
+    .st-deslopper-settings .sd_stats_body > .sd_hero,
+    .st-deslopper-settings .sd_stats_body > .sd_span,
+    .st-deslopper-settings .sd_stats_body > .sd_empty,
+    .st-deslopper-settings .sd_stats_body > .sd_stats_foot {
         grid-column: 1 / -1;
     }
 }
 
-.st-desloper-settings .sd_pin_inputs {
+.st-deslopper-settings .sd_pin_inputs {
     display: inline-flex;
     align-items: center;
     gap: 4px;
 }
 
-.st-desloper-settings .sd_hero {
+.st-deslopper-settings .sd_hero {
     display: flex;
     align-items: center;
     gap: 20px;
@@ -1216,7 +1216,7 @@
 }
 
 /* Score ring: a conic sweep masked to a ring, so the centre stays see-through glass. */
-.st-desloper-settings .sd_ring {
+.st-deslopper-settings .sd_ring {
     --sd-p: 0;
     position: relative;
     flex: 0 0 auto;
@@ -1226,7 +1226,7 @@
     place-items: center;
 }
 
-.st-desloper-settings .sd_ring::before {
+.st-deslopper-settings .sd_ring::before {
     content: "";
     position: absolute;
     inset: 0;
@@ -1236,17 +1236,17 @@
     mask: radial-gradient(farthest-side, transparent calc(100% - 10px), #000 calc(100% - 9px));
 }
 
-.st-desloper-settings .sd_ring_inner {
+.st-deslopper-settings .sd_ring_inner {
     text-align: center;
 }
 
-.st-desloper-settings .sd_ring_num {
+.st-deslopper-settings .sd_ring_num {
     font-size: 2em;
     font-weight: 800;
     line-height: 1;
 }
 
-.st-desloper-settings .sd_ring_label {
+.st-deslopper-settings .sd_ring_label {
     margin-top: 3px;
     font-size: 0.66em;
     letter-spacing: 0.08em;
@@ -1254,7 +1254,7 @@
     opacity: 0.6;
 }
 
-.st-desloper-settings .sd_hero_side {
+.st-deslopper-settings .sd_hero_side {
     flex: 1;
     min-width: 0;
     display: flex;
@@ -1262,103 +1262,103 @@
     gap: 8px;
 }
 
-.st-desloper-settings .sd_hero_title {
+.st-deslopper-settings .sd_hero_title {
     font-size: 1.1em;
     font-weight: 700;
 }
 
-.st-desloper-settings .sd_hero_line {
+.st-deslopper-settings .sd_hero_line {
     font-size: 0.86em;
     opacity: 0.8;
 }
 
-.st-desloper-settings .sd_tiles {
+.st-deslopper-settings .sd_tiles {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(118px, 170px));
     gap: 6px;
 }
 
-.st-desloper-settings .sd_tile {
+.st-deslopper-settings .sd_tile {
     padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid var(--sd-line-soft);
     background: var(--sd-well);
 }
 
-.st-desloper-settings .sd_tile_value {
+.st-deslopper-settings .sd_tile_value {
     font-size: 1.2em;
     font-weight: 700;
     line-height: 1.2;
 }
 
-.st-desloper-settings .sd_tile_label {
+.st-deslopper-settings .sd_tile_label {
     font-size: 0.7em;
     letter-spacing: 0.05em;
     text-transform: uppercase;
     opacity: 0.58;
 }
 
-.st-desloper-settings .sd_delta_up {
+.st-deslopper-settings .sd_delta_up {
     color: var(--sd-warn);
 }
 
-.st-desloper-settings .sd_delta_down {
+.st-deslopper-settings .sd_delta_down {
     color: var(--sd-ok);
 }
 
-.st-desloper-settings .sd_stats_card {
+.st-deslopper-settings .sd_stats_card {
     display: flex;
     flex-direction: column;
     gap: 6px;
     padding: 10px 12px;
 }
 
-.st-desloper-settings .sd_metrics {
+.st-deslopper-settings .sd_metrics {
     width: 100%;
     border-collapse: collapse;
     font-size: 0.9em;
 }
 
-.st-desloper-settings .sd_metrics td {
+.st-deslopper-settings .sd_metrics td {
     padding: 6px 6px;
     border-top: 1px solid var(--sd-line-soft);
     vertical-align: middle;
 }
 
-.st-desloper-settings .sd_metrics tr:first-child td {
+.st-deslopper-settings .sd_metrics tr:first-child td {
     border-top: 0;
 }
 
-.st-desloper-settings .sd_metric {
+.st-deslopper-settings .sd_metric {
     cursor: pointer;
     transition: background-color 0.12s;
 }
 
-.st-desloper-settings .sd_metric:hover,
-.st-desloper-settings .sd_metric.sd_open {
+.st-deslopper-settings .sd_metric:hover,
+.st-deslopper-settings .sd_metric.sd_open {
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_metric_label {
+.st-deslopper-settings .sd_metric_label {
     width: 100%;
 }
 
-.st-desloper-settings .sd_metric_label .sd_hint {
+.st-deslopper-settings .sd_metric_label .sd_hint {
     padding-left: 1.5em;
 }
 
-.st-desloper-settings .sd_row_chevron {
+.st-deslopper-settings .sd_row_chevron {
     width: 1.5em;
     font-size: 0.65em;
     opacity: 0.4;
     transition: transform 0.2s;
 }
 
-.st-desloper-settings .sd_metric.sd_open .sd_row_chevron {
+.st-deslopper-settings .sd_metric.sd_open .sd_row_chevron {
     transform: rotate(90deg);
 }
 
-.st-desloper-settings .sd_metric_value {
+.st-deslopper-settings .sd_metric_value {
     font-weight: 700;
     font-size: 1.05em;
     white-space: nowrap;
@@ -1366,24 +1366,24 @@
     min-width: 3.5em;
 }
 
-.st-desloper-settings .sd_metric_base {
+.st-deslopper-settings .sd_metric_base {
     font-size: 0.88em;
     opacity: 0.55;
     white-space: nowrap;
     text-align: right;
 }
 
-.st-desloper-settings .sd_metric_status {
+.st-deslopper-settings .sd_metric_status {
     text-align: right;
 }
 
-.st-desloper-settings .sd_metric_detail > td {
+.st-deslopper-settings .sd_metric_detail > td {
     padding: 4px 10px 10px 2em;
     border-top: 0;
     background: var(--sd-glass-hover);
 }
 
-.st-desloper-settings .sd_status {
+.st-deslopper-settings .sd_status {
     font-size: 0.75em;
     font-weight: 600;
     padding: 1px 8px;
@@ -1392,36 +1392,36 @@
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_status_worse {
+.st-deslopper-settings .sd_status_worse {
     color: var(--sd-warn);
 }
 
-.st-desloper-settings .sd_status_better {
+.st-deslopper-settings .sd_status_better {
     color: var(--sd-ok);
 }
 
-.st-desloper-settings .sd_status_moved {
+.st-deslopper-settings .sd_status_moved {
     opacity: 0.75;
 }
 
-.st-desloper-settings .sd_spark {
+.st-deslopper-settings .sd_spark {
     display: block;
     opacity: 0.75;
     color: var(--sd-accent);
 }
 
-.st-desloper-settings .sd_examples {
+.st-deslopper-settings .sd_examples {
     margin: 2px 0;
     padding-left: 1.2em;
     font-size: 0.88em;
     line-height: 1.45;
 }
 
-.st-desloper-settings .sd_examples li {
+.st-deslopper-settings .sd_examples li {
     margin: 2px 0;
 }
 
-.st-desloper-settings .sd_examples_cards {
+.st-deslopper-settings .sd_examples_cards {
     padding: 0;
     list-style: none;
     display: flex;
@@ -1429,32 +1429,32 @@
     gap: 4px;
 }
 
-.st-desloper-settings .sd_examples_cards > li {
+.st-deslopper-settings .sd_examples_cards > li {
     padding: 5px 9px;
     border-left: 2px solid var(--sd-warn);
     border-radius: 0 6px 6px 0;
     background: var(--sd-well);
 }
 
-.st-desloper-settings .sd_detail_line {
+.st-deslopper-settings .sd_detail_line {
     font-size: 0.86em;
     opacity: 0.85;
     margin-bottom: 2px;
 }
 
-.st-desloper-settings .sd_jump {
+.st-deslopper-settings .sd_jump {
     cursor: pointer;
     font-weight: 700;
     color: var(--sd-accent);
     text-decoration: none;
 }
 
-.st-desloper-settings .sd_jump:hover {
+.st-deslopper-settings .sd_jump:hover {
     text-decoration: underline;
 }
 
 /* Reused phrases */
-.st-desloper-settings .sd_motifs {
+.st-deslopper-settings .sd_motifs {
     display: flex;
     flex-direction: column;
     margin: 0;
@@ -1462,16 +1462,16 @@
     list-style: none;
 }
 
-.st-desloper-settings .sd_motif {
+.st-deslopper-settings .sd_motif {
     padding: 6px 2px;
     border-top: 1px solid var(--sd-line-soft);
 }
 
-.st-desloper-settings .sd_motif:first-child {
+.st-deslopper-settings .sd_motif:first-child {
     border-top: 0;
 }
 
-.st-desloper-settings .sd_motif_row {
+.st-deslopper-settings .sd_motif_row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1479,29 +1479,29 @@
     font-size: 0.9em;
 }
 
-.st-desloper-settings .sd_motif_phrase {
+.st-deslopper-settings .sd_motif_phrase {
     font-weight: 600;
     flex: 1 1 14em;
     min-width: 0;
 }
 
-.st-desloper-settings .sd_motif_stats {
+.st-deslopper-settings .sd_motif_stats {
     font-size: 0.88em;
     opacity: 0.6;
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_motif_links {
+.st-deslopper-settings .sd_motif_links {
     font-size: 0.88em;
 }
 
-.st-desloper-settings .sd_motif_done {
+.st-deslopper-settings .sd_motif_done {
     font-size: 0.8em;
     opacity: 0.6;
     white-space: nowrap;
 }
 
-.st-desloper-settings .sd_motif_form {
+.st-deslopper-settings .sd_motif_form {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -1513,7 +1513,7 @@
 }
 
 /* Folds at the bottom of the stats: stock-phrase list, other chats */
-.st-desloper-settings .sd_fold > summary {
+.st-deslopper-settings .sd_fold > summary {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -1522,56 +1522,56 @@
     cursor: pointer;
 }
 
-.st-desloper-settings .sd_fold > summary .sd_hint {
+.st-deslopper-settings .sd_fold > summary .sd_hint {
     display: inline;
 }
 
-.st-desloper-settings .sd_fold[open] > summary {
+.st-deslopper-settings .sd_fold[open] > summary {
     border-bottom: 1px solid var(--sd-line-soft);
 }
 
-.st-desloper-settings .sd_fold > :not(summary) {
+.st-deslopper-settings .sd_fold > :not(summary) {
     margin: 8px 12px;
 }
 
-.st-desloper-settings .sd_fold > :last-child:not(summary) {
+.st-deslopper-settings .sd_fold > :last-child:not(summary) {
     margin-bottom: 12px;
 }
 
-.st-desloper-settings .sd_stats_foot {
+.st-deslopper-settings .sd_stats_foot {
     text-align: center;
     padding: 2px 0;
 }
 
 @container (max-width: 560px) {
-    .st-desloper-settings .sd_hero {
+    .st-deslopper-settings .sd_hero {
         flex-direction: column;
         align-items: stretch;
     }
 
-    .st-desloper-settings .sd_ring {
+    .st-deslopper-settings .sd_ring {
         align-self: center;
     }
 
-    .st-desloper-settings .sd_metric_base,
-    .st-desloper-settings .sd_metric_spark {
+    .st-deslopper-settings .sd_metric_base,
+    .st-deslopper-settings .sd_metric_spark {
         display: none;
     }
 
-    .st-desloper-settings .sd_toolbar_end {
+    .st-deslopper-settings .sd_toolbar_end {
         margin-left: 0;
     }
 
-    .st-desloper-settings .sd_stats_controls .sd_control {
+    .st-deslopper-settings .sd_stats_controls .sd_control {
         flex: 1 1 100%;
         min-width: 0;
     }
 
-    .st-desloper-settings .sd_stats_controls .sd_control_label {
+    .st-deslopper-settings .sd_stats_controls .sd_control_label {
         flex: 0 0 7.5em;
     }
 
-    .st-desloper-settings .sd_stats_controls .sd_select {
+    .st-deslopper-settings .sd_stats_controls .sd_select {
         flex: 1 1 auto;
         min-width: 0;
     }

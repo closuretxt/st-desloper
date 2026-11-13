@@ -13,7 +13,7 @@ export function logDebug(...args) {
 
 export function notify(message, type = "info", timeOut) {
     if (typeof toastr !== "undefined") {
-        toastr[type](message, "ST Desloper", timeOut ? { timeOut } : undefined);
+        toastr[type](message, "ST Deslopper", timeOut ? { timeOut } : undefined);
     } else {
         console.log(`${LOG_PREFIX}[${type}]`, message);
     }

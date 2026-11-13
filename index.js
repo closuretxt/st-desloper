@@ -28,7 +28,7 @@ function openFixesSafely(tab) {
 // The drawer's one-line patterns summary; a click opens the popup on that tab.
 function refreshPatternsSummary() {
     const { total, on } = patternsSummary();
-    const $el = $("#st_desloper_patterns_summary").empty();
+    const $el = $("#st_deslopper_patterns_summary").empty();
     $el.append($('<i class="fa-solid fa-code">'), $("<span>").text("Your patterns"));
     $el.append($('<span class="sd_badge">').text(total ? `${on} of ${total} on` : "none yet"));
     $el.append($('<i class="fa-solid fa-chevron-right sd_quick_patterns_go">'));
@@ -39,7 +39,7 @@ function refreshStatsBadge() {
     try {
         const id = getContext().getCurrentChatId?.();
         const last = id ? getSummaries().find(x => x.chatId === id) : null;
-        $("#st_desloper_stats_last")
+        $("#st_deslopper_stats_last")
             .prop("hidden", !last)
             .text(last ? `this chat: ${last.score}` : "")
             .attr("title", last ? `Slop score when the stats were last opened (${new Date(last.ts).toLocaleDateString()}), 0 clean, 100 all slop` : "");
@@ -52,18 +52,18 @@ function initDrawer() {
     renderQuickRules();
     refreshPatternsSummary();
     refreshStatsBadge();
-    $("#st_desloper_fixes_open").on("click", () => openFixesSafely("fixes"));
-    $("#st_desloper_tester_open").on("click", () => openFixesSafely("tester"));
-    $("#st_desloper_patterns_summary").on("click", () => openFixesSafely("patterns"));
+    $("#st_deslopper_fixes_open").on("click", () => openFixesSafely("fixes"));
+    $("#st_deslopper_tester_open").on("click", () => openFixesSafely("tester"));
+    $("#st_deslopper_patterns_summary").on("click", () => openFixesSafely("patterns"));
 }
 
-// Three ways in: the drawer button, the wand menu, and /desloper-stats.
+// Three ways in: the drawer button, the wand menu, and /deslopper-stats.
 function initStatsEntry() {
-    $("#st_desloper_stats_open").on("click", openStatsSafely);
+    $("#st_deslopper_stats_open").on("click", openStatsSafely);
 
-    if (!$("#st_desloper_stats_menu").length) {
-        const item = $(`<div id="st_desloper_stats_menu" class="list-group-item flex-container flexGap5" title="Desloper stats for the open chat">
-            <div class="fa-solid fa-chart-simple extensionsMenuExtensionButton"></div>Desloper stats</div>`);
+    if (!$("#st_deslopper_stats_menu").length) {
+        const item = $(`<div id="st_deslopper_stats_menu" class="list-group-item flex-container flexGap5" title="Deslopper stats for the open chat">
+            <div class="fa-solid fa-chart-simple extensionsMenuExtensionButton"></div>Deslopper stats</div>`);
         item.on("click", openStatsSafely);
         $("#extensionsMenu").append(item);
     }
@@ -72,8 +72,8 @@ function initStatsEntry() {
     if (ctx.SlashCommandParser && ctx.SlashCommand) {
         ctx.SlashCommandParser.addCommandObject(
             ctx.SlashCommand.fromProps({
-                name: "desloper-stats",
-                helpString: "Opens Desloper's stats for the open chat.",
+                name: "deslopper-stats",
+                helpString: "Opens Deslopper's stats for the open chat.",
                 callback: async () => {
                     openStatsSafely();
                     return "";
@@ -83,7 +83,7 @@ function initStatsEntry() {
     }
 }
 
-// Every handler is wrapped: a Desloper bug must never break the chat.
+// Every handler is wrapped: a Deslopper bug must never break the chat.
 // first: run ahead of other extensions' handlers (ST's makeFirst, when this ST has it).
 export function on(eventName, label, handler, { first = false } = {}) {
     if (!eventName) {
@@ -110,7 +110,7 @@ jQuery(async () => {
     try {
         const settingsHtml = await $.get(`${extensionFolderPath}/index.html`);
         const tempDiv = $("<div>").html(settingsHtml);
-        $("#extensions_settings").append(tempDiv.find("#st_desloper_settings_block"));
+        $("#extensions_settings").append(tempDiv.find("#st_deslopper_settings_block"));
 
         loadSettings();
         initSettingsListeners();
@@ -121,7 +121,7 @@ jQuery(async () => {
         initStream(on);
 
         // Not a saved setting (st/display.js says why), so it isn't in settingsManager's table.
-        $("#st_desloper_show_originals")
+        $("#st_deslopper_show_originals")
             .prop("checked", false)
             .on("change", function () {
                 try {
